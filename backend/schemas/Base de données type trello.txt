@@ -1,0 +1,69 @@
+Base de données type trello
+
+User
+- User_id (PK)
+- name
+- surname
+- email (unique)
+- Password_hash
+- created_at
+- modified_at
+
+Board_members
+- board_member_id (PK)
+- board_id (FK)
+- user_id (FK)
+- role (admin/member)
+Unique(board_id,user_id)
+
+Board
+- board_id (PK)
+- title
+- Description (nullable)
+- owner_id (FK)
+- created_at
+- modified_at
+
+lists
+- list_id (PK)
+- color
+- Title
+- Position
+- Board_id (FK)
+
+Card
+- id_card (PK)
+- title
+- Description (nullable)
+- position
+- created_at
+- modified_at
+- list_id (FK)
+
+Card_member
+- card_id (FK)
+- user_id (FK)
+Primary Key (card_id, user_id)
+
+Comments
+- comment_id (PK)
+- Content
+- created_at
+- modified_at
+- user_id (FK)
+- card_id (FK)
+
+Label
+- name
+- color
+- board_id (FK)
+
+card_label
+- card_id (FK)
+- label_id (FK)
+Primary Key (card_id,label_id)
+
+Cascade delete (boards -> lists -> cards -> card_label -> label -> comments)
+
+created_at DEFAULT now()
+modified_at DEFAULT now()
