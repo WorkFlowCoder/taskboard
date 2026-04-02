@@ -1,0 +1,19 @@
+.boards-page {
+  padding: 20px;
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+.boards-page h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.boards-page ul {
+  list-style-type: disc;
+  padding-left: 20px;
+}
+
+.boards-page li {
+  margin-bottom: 5px;
+}

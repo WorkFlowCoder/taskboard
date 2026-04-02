@@ -1,0 +1,19 @@
+.projects-page {
+  padding: 20px;
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+.projects-page h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.projects-page ul {
+  list-style-type: disc;
+  padding-left: 20px;
+}
+
+.projects-page li {
+  margin-bottom: 5px;
+}

@@ -1,0 +1,82 @@
+/* Styles pour une page d'accueil moderne */
+.homepage {
+  text-align: center;
+  font-family: Arial, sans-serif;
+  color: white;
+}
+
+.homepage h2 {
+  font-size: 2rem;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.homepage p {
+  font-size: 1.2rem;
+  color: white;
+}
+
+.homepage-header {
+  text-align: center;
+  padding: 2rem;
+  color: white;
+}
+
+.homepage-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.homepage-header p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.cta-button {
+  background-color: #ffffff;
+  color: black;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.features {
+  display: flex;
+  justify-content: space-around;
+  background-color: white;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.feature {
+  background-color: #ffffff;
+  border: 1px solid #a6a7a9;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  padding: 1.5rem;
+  max-width: 300px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.feature:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.feature svg {
+  margin-bottom: 1rem;
+}
+
+.feature h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.feature p {
+  font-size: 1rem;
+  color: #555;
+}

@@ -1,0 +1,157 @@
+/* Variables CSS pour les couleurs */
+:root {
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --navbar-bg: #ffffff;
+  --navbar-text: #333333;
+}
+
+/* Styles pour une Navbar moderne et blanche */
+.navbar {
+  width: 100%; /* Prend toute la largeur de l'écran */
+  background-color: var(--navbar-bg);
+  color: var(--navbar-text);
+  padding: 0 2rem; /* Ajustement du padding pour correspondre à la nouvelle hauteur */
+  display: flex;
+  justify-content: space-between; /* Répartit les éléments correctement */
+  align-items: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-sizing: border-box; /* Assure que tout reste dans 100% */
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #333333;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-right: inherit;
+}
+
+.navbar-logo img {
+  height: 40px;
+  width: 40px;
+}
+
+.navbar-links {
+  margin-left: 2rem; /* Ajout d'un espacement entre le titre et les liens */
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-links li a {
+  color: #333333;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.navbar-options {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* Espacement entre les logos */
+  margin-left: auto; /* Aligne les logos à droite */
+}
+
+.navbar-options img {
+  height: 24px;
+  width: 24px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.navbar-options img:hover {
+  transform: scale(1.1);
+}
+
+/* Ajustement pour aligner les liens à côté du logo/titre */
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Espacement réduit entre le titre et les liens */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .navbar-links {
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .navbar-links li {
+    width: 100%;
+  }
+
+  .navbar-links li a {
+    display: block;
+    padding: 0.5rem 1rem;
+    width: 100%;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+  }
+
+  .navbar-links li a:hover {
+    background-color: #eaeaea;
+  }
+
+  .navbar-options {
+    flex-direction: row;
+    justify-content: flex-end;
+    width: 100%;
+  }
+}
+
+/* Styles pour le mode sombre */
+body.dark-theme {
+  background-color: #121212;
+  color: #ffffff;
+}
+
+.navbar {
+  background-color: #ffffff;
+  color: #333333;
+}
+
+body.dark-theme .navbar {
+  background-color: #1e1e1e;
+  color: #ffffff;
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  transition: transform 0.3s;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+}
