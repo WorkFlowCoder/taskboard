@@ -1,6 +1,7 @@
 -- Users
 INSERT INTO users (first_name,last_name,email,password)
-VALUES ('Doe', 'John', 'john@example.com', 'hash');
+VALUES ('John', 'Doe', 'johnDoe@gmail.com', '$argon2id$v=19$m=65536,t=3,p=4$qZXSuhcCAGDs/T+HcK6V8g$RpnlqmxQ5MZp2cQwQOjynBEQBOmhEv1VCqwo5/az0uA');
+-- mot de passe : @JohnDoe35fr
 
 -- Boards
 INSERT INTO boards (title, user_id)
