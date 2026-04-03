@@ -81,6 +81,15 @@
   transform: scale(1.1);
 }
 
+.navbar-options .lucide-icon {
+  cursor: pointer;
+}
+
+.navbar-options .lucide-icon:hover {
+  cursor: pointer;
+  opacity: 0.8; /* Optionnel : effet visuel pour indiquer le survol */
+}
+
 /* Ajustement pour aligner les liens à côté du logo/titre */
 .navbar-left {
   display: flex;

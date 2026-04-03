@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Settings, LogIn, LayoutDashboard } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import './Navbar.css';
 import ThemeToggle from "./ThemeToggle";
+import AuthModal from "./AuthModal";
 
 interface NavbarProps {
   isDark: boolean;
@@ -10,6 +11,16 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme }) => {
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  const toggleAuthModal = () => {
+    setIsAuthModalOpen(!isAuthModalOpen);
+  };
+
+  const closeAuthModal = () => {
+    setIsAuthModalOpen(false);
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-logo">
@@ -28,8 +39,9 @@ const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme }) => {
       <div className="navbar-options">
         <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
         <Settings size={24} className="lucide-icon" />
-        <LogIn size={24} className="lucide-icon" />
+        <LogIn size={24} className="lucide-icon" onClick={toggleAuthModal} />
       </div>
+      {isAuthModalOpen && <AuthModal onClose={closeAuthModal} />}
     </nav>
   );
 };
