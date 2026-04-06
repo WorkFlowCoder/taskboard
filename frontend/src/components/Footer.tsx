@@ -5,6 +5,9 @@ interface FooterProps {
   isDark: boolean;
 }
 
+// Composant Footer pour afficher le pied de page de l'application
+// Change de style en fonction du thème (clair ou sombre)
+
 const Footer: React.FC<FooterProps> = ({ isDark }) => {
   return (
     <footer className={`homepage-footer da-color ${isDark ? 'dark' : 'light'}`}>

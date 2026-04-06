@@ -1,22 +1,29 @@
 import React, { useState } from 'react';
-import { Settings, LogIn, LayoutDashboard } from 'lucide-react';
+import { Settings, LogIn, LogOut, LayoutDashboard } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import './Navbar.css';
 import ThemeToggle from "./ThemeToggle";
 import AuthModal from "./AuthModal";
+import { useAuth } from "./AuthContext";
 
 interface NavbarProps {
   isDark: boolean;
   toggleTheme: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme }) => {
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+// Composant Navbar pour la barre de navigation principale de l'application
+// Permet de naviguer entre les différentes sections et de gérer les options utilisateur
 
+const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme }) => {
+  const { isAuthenticated, logout } = useAuth(); // Gestion de l'état d'authentification
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false); // État pour afficher ou masquer la modal d'authentification
+
+  // Fonction pour basculer l'affichage de la modal d'authentification
   const toggleAuthModal = () => {
     setIsAuthModalOpen(!isAuthModalOpen);
   };
 
+  // Fonction pour fermer la modal d'authentification
   const closeAuthModal = () => {
     setIsAuthModalOpen(false);
   };
@@ -37,11 +44,15 @@ const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme }) => {
         <li><Link to="/projets">Projets</Link></li>
       </ul>
       <div className="navbar-options">
-        <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} />
-        <Settings size={24} className="lucide-icon" />
-        <LogIn size={24} className="lucide-icon" onClick={toggleAuthModal} />
+        <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} /> {/* Commutateur de thème */}
+        <Settings size={24} className="lucide-icon" /> {/* Icône des paramètres */}
+        {isAuthenticated ? (
+          <LogOut size={24} className="lucide-icon" onClick={logout} /> // Icône pour se déconnecter
+        ) : (
+          <LogIn size={24} className="lucide-icon" onClick={toggleAuthModal} /> // Icône pour se connecter
+        )}
       </div>
-      {isAuthModalOpen && <AuthModal onClose={closeAuthModal} />}
+      {isAuthModalOpen && <AuthModal onClose={closeAuthModal} />} {/* Modal d'authentification */}
     </nav>
   );
 };

@@ -1,5 +1,7 @@
 import React from 'react';
 
+// Page TeamsPage pour afficher et gérer les équipes
+
 const TeamsPage: React.FC = () => {
   return (
     <div className="teams-page">

@@ -1,22 +1,28 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { useAuth } from './AuthContext';
 import './AuthModal.css';
-
-const API_REGISTER_URL = "http://localhost:8000/register"; // URL pour l'enregistrement
-const API_LOGIN_URL = "http://localhost:8000/login"; // URL pour la connexion
+import { registerUser, loginUser } from '../services/userService';
 
 interface AuthModalProps {
   onClose: () => void;
 }
 
+// Composant React pour gérer l'authentification des utilisateurs
+// Permet à un utilisateur de s'enregistrer ou de se connecter
 const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [showPassword, setShowPassword] = useState(false);
+  const { login } = useAuth();
+  const [isLogin, setIsLogin] = useState(true); // État pour basculer entre connexion et inscription
+  const [errors, setErrors] = useState<{ [key: string]: string }>({}); // État pour gérer les erreurs de validation
+  const [showPassword, setShowPassword] = useState(false); // État pour afficher ou masquer le mot de passe
 
+  // Fonction pour basculer entre les modes connexion et inscription
   const toggleAuthMode = () => setIsLogin(!isLogin);
+
+  // Fonction pour afficher/masquer le mot de passe
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
+  // Fonction pour gérer la soumission du formulaire
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
@@ -29,6 +35,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
 
     const newErrors: { [key: string]: string } = {};
 
+    // Validation des champs du formulaire
     if (!email) {
         newErrors.email = 'L\'email est requis.';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -55,35 +62,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-        console.log(JSON.stringify(
-                    isLogin
-                        ? { email, password } // Pour la connexion
-                        : { first_name: firstName, last_name: lastName, email, password } // Pour l'enregistrement
-                ));
         try {
-            const response = await fetch(isLogin ? API_LOGIN_URL : API_REGISTER_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(
-                    isLogin
-                        ? { email, password } // Pour la connexion
-                        : { first_name: firstName, last_name: lastName, email, password } // Pour l'enregistrement
-                ),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || 'Une erreur est survenue.');
-            }
-
-            const data = await response.json();
-            console.log(isLogin ? 'Connexion réussie:' : 'Utilisateur créé avec succès:', data);
-
-            // Stocker le jeton dans le stockage local
-            localStorage.setItem('authToken', data.access_token);
-
+            const data = isLogin
+              ? await loginUser(email, password)
+              : await registerUser(firstName, lastName, email, password);
+            // Appeler la méthode login avec le jeton
+            login(data.access_token);
             // Fermer la modal après succès
             onClose();
         } catch (error: any) {

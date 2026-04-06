@@ -17,3 +17,25 @@
 .boards-page li {
   margin-bottom: 5px;
 }
+
+.create-board-button {
+  padding: 10px 15px;
+  font-size: 1rem;
+  color: white;
+  background-color: #007bff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.create-board-button:hover {
+  background-color: #0056b3;
+}
+
+.boards-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}

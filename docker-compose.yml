@@ -61,10 +61,32 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@example.com  # Identifiant par défaut
       PGADMIN_DEFAULT_PASSWORD: admin          # Mot de passe par défaut
+      PGADMIN_CONFIG_SERVER_MODE: "False"      # Permet de configurer les serveurs
+      # PGADMIN_CONFIG_MASTER_PASSWORD: "masterpassword123" 
+      PGADMIN_SERVER_JSON: |
+        {
+          "Servers": {
+            "1": {
+              "Name": "trello-db",
+              "Group": "Servers",
+              "Host": "${DB_HOST}",
+              "Port": "${DB_PORT}",
+              "MaintenanceDB": "${DB_NAME}",
+              "Username": "${DB_USER}",
+              "Password": "${DB_PASSWORD}",
+              "SSLMode": "prefer",
+              "Comment": "Connexion automatique à PostgreSQL"
+            }
+          }
+        }
+    volumes:
+      - ./pgadmin:/var/lib/pgadmin
     ports:
       - 5050:80
     depends_on:
       - db
+    user: root  # Exécuter en tant que root pour éviter les problèmes de permissions
+    command: ["/bin/sh", "-c", "chown -R pgadmin:pgadmin /var/lib/pgadmin && /entrypoint.sh"]
 
 volumes:
   postgres_data:

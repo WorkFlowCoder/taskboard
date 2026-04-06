@@ -1,0 +1,22 @@
+/* Styles pour la page ViewBoard */
+.board-page {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.board-page h1 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.board-page p {
+  font-size: 1rem;
+  color: #555;
+  margin: 5px 0;
+}
+
+.board-page .error-message {
+  color: red;
+  font-weight: bold;
+}

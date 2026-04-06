@@ -5,6 +5,7 @@ import Footer from './components/Footer';
 import BoardsPage from './pages/BoardsPage';
 import TeamsPage from './pages/TeamsPage';
 import ProjectsPage from './pages/ProjectsPage';
+import ViewBoard from './pages/ViewBoard';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
@@ -46,8 +47,9 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/teams" element={<TeamsPage />} />
-        <Route path="/board" element={<BoardsPage />} />
-        <Route path="/projets" element={<ProjectsPage />} />
+        <Route path="/boards" element={<BoardsPage />} />
+        <Route path="/boards/:id" element={<ViewBoard />} />
+        <Route path="/projects" element={<ProjectsPage />} />
       </Routes>
       <Footer isDark={isDark} />
     </Router>

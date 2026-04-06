@@ -2,6 +2,8 @@ import React from 'react';
 import { ClipboardList, Users, Rocket } from 'lucide-react';
 import './HomePage.css';
 
+// Page HomePage pour présenter l'application Trello-Like
+
 const HomePage: React.FC = () => {
   return (
     <div className="homepage">

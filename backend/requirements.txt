@@ -6,3 +6,5 @@ python-dotenv
 passlib
 argon2-cffi
 python-jose
+pydantic
+PyJWT
