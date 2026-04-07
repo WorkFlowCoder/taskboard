@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 import './ViewBoard.css';
 import { fetchBoardById } from '../services/boardService';
+import { createList } from '../services/listService';
+import List from '../components/List';
 
 const ViewBoard: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -10,6 +12,8 @@ const ViewBoard: React.FC = () => {
   const { isAuthenticated, authToken } = useAuth();
   const [board, setBoard] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showPopup, setShowPopup] = useState(false);
+  const [newList, setNewList] = useState({ title: '', color: '' });
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -34,6 +38,20 @@ const ViewBoard: React.FC = () => {
     fetchBoard();
   }, [id, isAuthenticated, navigate]);
 
+  const handleCreateList = async () => {
+    try {
+      const createdList = await createList({ ...newList, board_id: board.board_id }, authToken);
+      setBoard((prevBoard: any) => ({
+        ...prevBoard,
+        lists: [...prevBoard.lists, createdList],
+      }));
+      setShowPopup(false);
+      setNewList({ title: '', color: '' });
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
   if (error) {
     return <p className="error-message">{error}</p>;
   }
@@ -44,57 +62,38 @@ const ViewBoard: React.FC = () => {
 
   return (
     <div className="board-page">
-      <h1>{board.title || 'Sans titre'}</h1>
-      <p>Description : {board.description || 'Aucune description'}</p>
-      <p>Créé le : {new Date(board.created_at).toLocaleDateString()}</p>
-      <p>Dernière modification : {new Date(board.modified_at).toLocaleDateString()}</p>
+      <header className="board-header">
+        <h3 className="board-title">{board.title || 'Sans titre'}</h3>
+        <p className="board-description">{board.description || 'Aucune description'}</p>
+      </header>
       <div className="kanban-container">
         {board.lists?.map((list: any) => (
-          <div key={list.list_id} className="list">
-            <h2 className="list-title">{list.title}</h2>
-            <div className="cards-container">
-              {list.cards?.map((card: any) => (
-                <div key={card.card_id} className="card">
-                  <h3 className="card-title">{card.title}</h3>
-                  <p className="card-description">{card.description || 'Pas de description'}</p>
-                  <div className="card-labels">
-                    {card.labels?.map((labelId: number) => {
-                      const label = board.tags?.find((tag: any) => tag.label_id === labelId);
-                      return label ? (
-                        <span
-                          key={label.label_id}
-                          className="card-label"
-                          style={{ backgroundColor: label.color }}
-                        >
-                          {label.title}
-                        </span>
-                      ) : null;
-                    })}
-                  </div>
-                  <div className="card-members">
-                    {card.members?.map((memberId: number) => {
-                      const member = board.members?.find((m: any) => m.user_id === memberId);
-                      return member ? (
-                        <span key={member.user_id} className="card-member">
-                          {member.first_name} {member.last_name}
-                        </span>
-                      ) : null;
-                    })}
-                  </div>
-                  <div className="card-comments">
-                    <h4>Commentaires :</h4>
-                    {card.comments?.map((comment: any) => (
-                      <p key={comment.comment_id} className="card-comment">
-                        {comment.content}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <List key={list.list_id} list={list} board={board} members={board.members} />
         ))}
+        <div className="add-list-button" onClick={() => setShowPopup(true)}>
+          + Ajouter une liste
+        </div>
       </div>
+      {showPopup && (
+        <div className="popup">
+          <div className="popup-content">
+            <h4>Créer une nouvelle liste</h4>
+            <input
+              type="text"
+              placeholder="Titre"
+              value={newList.title}
+              onChange={(e) => setNewList({ ...newList, title: e.target.value })}
+            />
+            <input
+              type="color"
+              value={newList.color}
+              onChange={(e) => setNewList({ ...newList, color: e.target.value })}
+            />
+            <button onClick={handleCreateList}>Créer</button>
+            <button onClick={() => setShowPopup(false)}>Annuler</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

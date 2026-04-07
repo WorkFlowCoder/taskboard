@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Header
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from ..database import get_db
-from ..models import Board, User
+from ..models import Board, User, BoardMember
 from ..utils.auth import SECRET_KEY, ALGORITHM
 from fastapi.logger import logger
 from ..schemas.board import BoardCreate
@@ -177,6 +177,16 @@ def create_board(
     db.add(new_board)
     db.commit()
     db.refresh(new_board)
+
+    # Ajouter l'utilisateur comme membre du tableau avec le rôle d'administrateur
+    admin_member = BoardMember(
+        board_id=new_board.board_id,
+        user_id=current_user,
+        role="admin"
+    )
+    db.add(admin_member)
+    db.commit()
+
     return {"message": "Board créé avec succès", "board": new_board}
 
 # Route pour supprimer un board par son ID

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .routers import board_router, user_router
+from .routers import board_router, user_router, list_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -24,3 +24,6 @@ app.include_router(board_router.router)
 
 # Inclusion des routes pour les utilisateurs
 app.include_router(user_router.router)
+
+# Inclusion des routes pour la liste
+app.include_router(list_router.router)

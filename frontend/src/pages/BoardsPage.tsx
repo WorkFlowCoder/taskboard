@@ -130,7 +130,7 @@ const BoardsPage: React.FC = () => {
                     ) : (
                       <h3
                         onClick={() => !editingBoardId && handleBoardClick(board.board_id)}
-                        className={editingBoardId ? 'disabled' : ''}
+                        className={editingBoardId ? 'disabled' : 'h3-clickable'}
                       >
                         {board.title || 'Sans titre'}
                       </h3>

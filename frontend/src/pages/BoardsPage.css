@@ -24,15 +24,11 @@
   padding: 10px 15px;
   font-size: 1rem;
   color: white;
-  background-color: #007bff;
+  background-color: var(--primary-color);
   border: none;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
-}
-
-.create-board-button:hover {
-  background-color: #0056b3;
 }
 
 .boards-page-header {
@@ -66,10 +62,10 @@ li {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-h3 {
-  color: #007bff;
+.h3-clickable {
+  color: var(--primary-color);
   cursor: pointer;
-  margin-bottom: 5px;
+  margin: 5px;
 }
 
 h3.disabled {
@@ -121,16 +117,12 @@ button.cancel:hover {
 }
 
 button.edit {
-  background-color: #17a2b8;
+  background-color: var(--primary-color);
   color: white;
   border: none;
   padding: 5px 10px;
   border-radius: 5px;
   cursor: pointer;
-}
-
-button.edit:hover {
-  background-color: #138496;
 }
 
 button.delete {

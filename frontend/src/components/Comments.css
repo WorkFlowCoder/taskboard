@@ -1,0 +1,40 @@
+/* Styles for Comments component */
+.comments {
+  margin-top: 10px;
+}
+
+.comment {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+  position: relative;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.comment-author {
+  font-weight: bold;
+}
+
+.comment-date {
+  font-style: italic;
+}
+
+.comment-content {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.card-comment {
+  font-size: 0.8rem;
+  color: #444;
+  margin-top: 5px;
+}
