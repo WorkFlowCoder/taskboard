@@ -4,18 +4,16 @@ import { useAuth } from '../components/AuthContext';
 import './ViewBoard.css';
 import { fetchBoardById } from '../services/boardService';
 
-// Page ViewBoard pour afficher les détails d'un tableau spécifique
-
 const ViewBoard: React.FC = () => {
-  const { id } = useParams<{ id: string }>(); // Récupère l'identifiant du tableau depuis l'URL
-  const navigate = useNavigate(); // Permet de rediriger l'utilisateur
-  const { isAuthenticated, authToken } = useAuth(); // Récupère l'état d'authentification et le token
-  const [board, setBoard] = useState<any>(null); // État pour stocker les données du tableau
-  const [error, setError] = useState<string | null>(null); // État pour gérer les erreurs
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { isAuthenticated, authToken } = useAuth();
+  const [board, setBoard] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/board'); // Redirige vers BoardsPage si l'utilisateur n'est pas connecté
+      navigate('/boards');
       return;
     }
 
@@ -25,10 +23,11 @@ const ViewBoard: React.FC = () => {
           throw new Error('Utilisateur non authentifié');
         }
 
-        const data = await fetchBoardById(id!, authToken); // Récupère les données du tableau via le service
+        const data = await fetchBoardById(id!, authToken);
         setBoard(data);
+        console.log(data);
       } catch (err: any) {
-        setError(err.message); // Gère les erreurs lors de la récupération des données
+        setError(err.message);
       }
     };
 
@@ -36,19 +35,66 @@ const ViewBoard: React.FC = () => {
   }, [id, isAuthenticated, navigate]);
 
   if (error) {
-    return <p className="error-message">{error}</p>; // Affiche un message d'erreur si nécessaire
+    return <p className="error-message">{error}</p>;
   }
 
   if (!board) {
-    return <p>Chargement...</p>; // Affiche un message de chargement si les données ne sont pas encore disponibles
+    return <p>Chargement...</p>;
   }
 
   return (
     <div className="board-page">
-      <h1>{board.title || 'Sans titre'}</h1> {/* Affiche le titre du tableau */}
-      <p>Description : {board.description || 'Aucune description'}</p> {/* Affiche la description */}
-      <p>Créé le : {new Date(board.created_at).toLocaleDateString()}</p> {/* Affiche la date de création */}
-      <p>Dernière modification : {new Date(board.modified_at).toLocaleDateString()}</p> {/* Affiche la dernière modification */}
+      <h1>{board.title || 'Sans titre'}</h1>
+      <p>Description : {board.description || 'Aucune description'}</p>
+      <p>Créé le : {new Date(board.created_at).toLocaleDateString()}</p>
+      <p>Dernière modification : {new Date(board.modified_at).toLocaleDateString()}</p>
+      <div className="kanban-container">
+        {board.lists?.map((list: any) => (
+          <div key={list.list_id} className="list">
+            <h2 className="list-title">{list.title}</h2>
+            <div className="cards-container">
+              {list.cards?.map((card: any) => (
+                <div key={card.card_id} className="card">
+                  <h3 className="card-title">{card.title}</h3>
+                  <p className="card-description">{card.description || 'Pas de description'}</p>
+                  <div className="card-labels">
+                    {card.labels?.map((labelId: number) => {
+                      const label = board.tags?.find((tag: any) => tag.label_id === labelId);
+                      return label ? (
+                        <span
+                          key={label.label_id}
+                          className="card-label"
+                          style={{ backgroundColor: label.color }}
+                        >
+                          {label.title}
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
+                  <div className="card-members">
+                    {card.members?.map((memberId: number) => {
+                      const member = board.members?.find((m: any) => m.user_id === memberId);
+                      return member ? (
+                        <span key={member.user_id} className="card-member">
+                          {member.first_name} {member.last_name}
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
+                  <div className="card-comments">
+                    <h4>Commentaires :</h4>
+                    {card.comments?.map((comment: any) => (
+                      <p key={comment.comment_id} className="card-comment">
+                        {comment.content}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

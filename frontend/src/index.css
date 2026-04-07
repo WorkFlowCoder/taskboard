@@ -4,6 +4,10 @@ html, body {
   box-sizing: border-box;
 }
 
+:root {
+  --primary-color: #6a0dad; /* Déclare une variable pour une couleur */
+}
+
 /* Ajout d'un style pour le footer afin de s'assurer qu'il n'y a pas de rebord blanc */
 footer {
   margin: 0;
@@ -12,14 +16,14 @@ footer {
 
 /* Classe pour appliquer une couleur violette à tous les icônes Lucide-React */
 .lucide-icon {
-  color: #6a0dad;
+  color: var(--primary-color);
 }
 
 /* Appliquer la classe globalement */
 svg.lucide {
-  color: var(--color-primary, #6a0dad);
+  color: var(--primary-color);
 }
 
 .da-color {
-  background-color: #6a0dad;
+  background-color: var(--primary-color);
 }

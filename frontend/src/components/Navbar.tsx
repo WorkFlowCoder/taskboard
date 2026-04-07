@@ -40,7 +40,7 @@ const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme }) => {
       </div>
       <ul className="navbar-links">
         <li><Link to="/teams">Équipes</Link></li>
-        <li><Link to="/board">Tableaux</Link></li>
+        <li><Link to="/boards">Tableaux</Link></li>
         <li><Link to="/projets">Projets</Link></li>
       </ul>
       <div className="navbar-options">

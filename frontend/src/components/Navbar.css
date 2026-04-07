@@ -55,6 +55,12 @@
   padding: 0;
 }
 
+.navbar-links li {
+  padding: 0;
+  border: none;
+  margin: auto;
+}
+
 .navbar-links li a {
   color: #333333;
   text-decoration: none;

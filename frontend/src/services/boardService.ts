@@ -2,7 +2,7 @@ const API_BASE_URL = 'http://localhost:8000';
 
 export const fetchBoardById = async (id: string, authToken: string) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/boards/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/boards/${id}/details`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -77,6 +77,32 @@ export const deleteBoard = async (boardId: string, authToken: string) => {
 
     if (!response.ok) {
       throw new Error('Erreur lors de la suppression du board');
+    }
+
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateBoard = async (
+  boardId: string,
+  title: string,
+  description: string,
+  authToken: string
+) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/boards/${boardId}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ title, description }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Erreur lors de la mise à jour du board');
     }
 
     return await response.json();

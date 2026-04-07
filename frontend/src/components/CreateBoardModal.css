@@ -44,7 +44,7 @@
   padding: 10px 15px;
   font-size: 1rem;
   color: white;
-  background-color: #6a0dad;
+  background-color: var(--primary-color);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -132,7 +132,7 @@
   padding: 10px 15px;
   font-size: 1rem;
   color: white;
-  background-color: #6a0dad;
+  background-color: var(--primary-color);
   border: none;
   border-radius: 4px;
   cursor: pointer;

@@ -1,7 +1,9 @@
+/* Style pour la page BoardsPage */
+
 .boards-page {
+  font-family: Arial, sans-serif;
   padding: 20px;
   background-color: #f9f9f9;
-  color: #333;
 }
 
 .boards-page h1 {
@@ -10,8 +12,8 @@
 }
 
 .boards-page ul {
-  list-style-type: disc;
-  padding-left: 20px;
+  list-style-type: none;
+  padding: 0;
 }
 
 .boards-page li {
@@ -24,7 +26,7 @@
   color: white;
   background-color: #007bff;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
 }
@@ -38,4 +40,175 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+}
+
+.boards-page-header h1 {
+  color: #333;
+  font-size: 2rem;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  padding: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h3 {
+  color: #007bff;
+  cursor: pointer;
+  margin-bottom: 5px;
+}
+
+h3.disabled {
+  cursor: default;
+}
+
+p {
+  color: #555;
+  margin-bottom: 5px;
+}
+
+p.small {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+button {
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+button.save {
+  background-color: #28a745;
+  color: #fff;
+  margin-right: 10px;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button.save:hover {
+  background-color: #218838;
+}
+
+button.cancel {
+  background-color: #ffc107;
+  color: black;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button.cancel:hover {
+  background-color: #e0a800;
+}
+
+button.edit {
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button.edit:hover {
+  background-color: #138496;
+}
+
+button.delete {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button.delete:hover {
+  background-color: #c82333;
+}
+
+/* Style for editing indicator */
+.editing-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  background-color: #ffeeba; /* Higher contrast */
+  padding: 5px 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  color: #856404;
+  font-weight: bold;
+  z-index: 1000; /* Ensure it appears above other elements */
+}
+
+/* Style for editing indicator SVG */
+.editing-indicator svg {
+  margin-right: 5px;
+  color: orange;
+}
+
+/* Style for the Edit3 icon */
+.editable-title svg,
+.editable-description svg {
+  margin-right: 5px;
+  vertical-align: middle;
+  color: orange;
+}
+
+/* Style for editable title and description during editing */
+.editable-title,
+.editable-description {
+  color: orange;
+  outline: none; /* Remove black border */
+  border: none; /* Ensure no border appears */
+  background-color: transparent; /* Keep background clean */
+}
+
+/* Style for the Editable title */
+.editable-title {
+  display: flex;
+  align-items: center;
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+}
+
+/* Style for the Editable description */
+.editable-description {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.small {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+/* Style for the board frame */
+.board-frame {
+  border: 2px solid orange; /* Orange frame */
+  border-radius: 8px; /* Optional: Add rounded corners */
+  padding: 10px; /* Optional: Add spacing inside the frame */
 }

@@ -76,7 +76,7 @@
 }
 
 .auth-submit-button {
-  background-color: #6a0dad;
+  background-color: var(--primary-color);
   color: #fff;
   border: none;
   padding: 10px 15px;
@@ -86,7 +86,7 @@
 }
 
 .auth-submit-button:hover {
-  background-color: #5a009d;
+  background-color: var(--primary-color);
 }
 
 .auth-toggle-button {
@@ -95,13 +95,13 @@
   text-align: center;
   background: none;
   border: none;
-  color: #6a0dad;
+  color: var(--primary-color);
   cursor: pointer;
   text-decoration: underline;
 }
 
 .auth-modal-button {
-  background-color: #6a0dad;
+  background-color: var(--primary-color);
   color: #fff;
   border: none;
   padding: 10px 15px;
@@ -110,7 +110,7 @@
 }
 
 .auth-modal-button:hover {
-  background-color: #5a009d;
+  background-color: var(--primary-color);
 }
 
 .auth-modal-close {
@@ -120,12 +120,8 @@
   background: none;
   border: none;
   font-size: 1.5rem;
-  color: #6a0dad;
+  color: var(--primary-color);
   cursor: pointer;
-}
-
-.auth-modal-close:hover {
-  color: #5a009d;
 }
 
 .error-message {
