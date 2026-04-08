@@ -1,4 +1,5 @@
 import React from 'react';
+import './TeamsPage.css';
 
 // Page TeamsPage pour afficher et gérer les équipes
 

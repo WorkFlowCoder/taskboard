@@ -22,22 +22,13 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
     const root = document.documentElement;
-    const mediaElements = document.querySelectorAll("img, picture, video, canvas");
 
     if (isDark) {
       root.classList.add('dark');
       root.classList.remove('light');
-      root.style.filter = "invert(1) hue-rotate(180deg)";
-      mediaElements.forEach(el => {
-        (el as HTMLElement).style.filter = "invert(1) hue-rotate(180deg)";
-      });
     } else {
       root.classList.add('light');
       root.classList.remove('dark');
-      root.style.filter = "none";
-      mediaElements.forEach(el => {
-        (el as HTMLElement).style.filter = "none";
-      });
     }
   }, [isDark]);
 

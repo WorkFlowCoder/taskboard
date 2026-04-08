@@ -28,9 +28,9 @@
   font-style: italic;
 }
 
-.comment-content {
+p.comment-content {
   font-size: 0.9rem;
-  color: #333;
+  color: black;
 }
 
 .card-comment {

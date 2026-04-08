@@ -4,7 +4,7 @@ import { fetchAllBoards, deleteBoard, updateBoard } from '../services/boardServi
 import { useNavigate } from 'react-router-dom';
 import CreateBoardModal from '../components/CreateBoardModal'; // Import du nouveau composant CreateBoardModal
 import './BoardsPage.css';
-import { Edit3 } from 'lucide-react';
+import { Edit3, Trash2, XCircle, CheckCircle } from 'lucide-react';
 
 // Page BoardsPage pour afficher tous les tableaux de l'utilisateur
 
@@ -110,11 +110,6 @@ const BoardsPage: React.FC = () => {
                 className={editingBoardId === board.board_id ? 'editing' : ''}
               >
                 <div className="board-item relative">
-                  {editingBoardId === board.board_id && (
-                    <div className="editing-indicator" style={{ position: 'absolute', top: '10px', right: '10px' }}>
-                      <Edit3 /> En cours de modification
-                    </div>
-                  )}
                   <div>
                     {editingBoardId === board.board_id ? (
                       <h3
@@ -155,19 +150,21 @@ const BoardsPage: React.FC = () => {
                     <p className="small">
                       Dernière modification : {new Date(board.modified_at).toLocaleDateString()}
                     </p>
+                  </div>
+                  <div className="button-group">
                     {editingBoardId === board.board_id ? (
                       <>
                         <button
                           onClick={handleCancelEdit}
                           className="cancel"
                         >
-                          Annuler
+                          <XCircle /> {/* Icône pour annuler */}
                         </button>
                         <button
                           onClick={() => handleSaveEdit(board.board_id)}
                           className="save"
                         >
-                          Sauvegarder
+                          <CheckCircle /> {/* Icône pour sauvegarder */}
                         </button>
                       </>
                     ) : (
@@ -176,13 +173,13 @@ const BoardsPage: React.FC = () => {
                           onClick={() => handleEditBoard(board)}
                           className="edit"
                         >
-                          Modifier
+                          <Edit3 /> {/* Icône pour modifier */}
                         </button>
                         <button
                           className="delete"
                           onClick={() => handleDeleteBoard(board.board_id)}
                         >
-                          Supprimer
+                          <Trash2 /> {/* Icône pour supprimer */}
                         </button>
                       </>
                     )}

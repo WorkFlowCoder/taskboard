@@ -18,3 +18,16 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ isDark, toggleTheme }) => {
 };
 
 export default ThemeToggle;
+
+// Ajout d'une vérification stricte pour protéger --primary-color
+const toggleTheme = () => {
+  const root = document.documentElement;
+  const themeVariables = ['--background-color', '--text-color']; // Liste des variables modifiables
+
+  themeVariables.forEach((variable) => {
+    if (variable === '--primary-color') return; // Ignore explicitement --primary-color
+
+    const currentValue = getComputedStyle(root).getPropertyValue(variable).trim();
+    root.style.setProperty(variable, currentValue === 'light' ? 'dark' : 'light');
+  });
+};

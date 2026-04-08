@@ -3,7 +3,8 @@
 .boards-page {
   font-family: Arial, sans-serif;
   padding: 20px;
-  background-color: #f9f9f9;
+  background-color: var(--white-color);
+  color: var(--black-color);
 }
 
 .boards-page h1 {
@@ -38,11 +39,6 @@
   margin-bottom: 10px;
 }
 
-.boards-page-header h1 {
-  color: #333;
-  font-size: 2rem;
-}
-
 .error-message {
   color: red;
   font-weight: bold;
@@ -53,9 +49,25 @@ ul {
   padding: 0;
 }
 
-li {
-  background-color: #fff;
-  border: 1px solid #ddd;
+.board-item {
+  border: 1px solid var(--black-color);
+  margin: 15px;
+  padding: 15px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between; /* Sépare le contenu principal et les boutons */
+  align-items: center; /* Aligne verticalement les éléments */
+}
+
+.board-item .button-group {
+  display: flex;
+  gap: 10px; /* Espacement entre les boutons */
+  justify-content: flex-end; /* Aligne les boutons à droite */
+}
+
+.boards-page > li {
+  background-color: var(--white-color);
+  border: 1px solid var(--primary-color);
   border-radius: 8px;
   margin-bottom: 15px;
   padding: 15px;
@@ -72,27 +84,14 @@ h3.disabled {
   cursor: default;
 }
 
-p {
-  color: #555;
-  margin-bottom: 5px;
-}
-
 p.small {
   color: #888;
   font-size: 0.9rem;
 }
 
-button {
-  border: none;
-  border-radius: 5px;
-  padding: 10px 20px;
-  cursor: pointer;
-}
-
 button.save {
   background-color: #28a745;
   color: #fff;
-  margin-right: 10px;
   border: none;
   padding: 5px 10px;
   border-radius: 5px;
@@ -127,11 +126,14 @@ button.edit {
 
 button.delete {
   background-color: #dc3545;
-  color: white;
   border: none;
   padding: 5px 10px;
   border-radius: 5px;
   cursor: pointer;
+}
+
+button.delete svg.lucide, button.edit svg.lucide, button.cancel svg.lucide, button.save svg.lucide {
+  color: var(--black-color);
 }
 
 button.delete:hover {

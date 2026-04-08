@@ -41,7 +41,7 @@ const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme }) => {
       <ul className="navbar-links">
         <li><Link to="/teams">Équipes</Link></li>
         <li><Link to="/boards">Tableaux</Link></li>
-        <li><Link to="/projets">Projets</Link></li>
+        <li><Link to="/projects">Projets</Link></li>
       </ul>
       <div className="navbar-options">
         <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} /> {/* Commutateur de thème */}

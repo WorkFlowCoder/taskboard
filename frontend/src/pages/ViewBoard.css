@@ -2,6 +2,10 @@
 .board-page {
   padding: 20px;
   font-family: Arial, sans-serif;
+  background-color: var(--white-color);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .board-page h1 {
@@ -12,7 +16,7 @@
 
 .board-page p {
   font-size: 1rem;
-  color: #555;
+  color: var(--black-color);
   margin: 5px 0;
 }
 
@@ -39,16 +43,6 @@
   font-size: 1.2rem;
   margin-bottom: 20px;
   color: #6b778c;
-}
-
-/* General board styling */
-.board-page {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-  background-color: #f4f5f7;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
 }
 
 .board-header {

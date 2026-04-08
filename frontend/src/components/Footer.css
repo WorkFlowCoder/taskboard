@@ -1,7 +1,12 @@
 .homepage-footer {
-  color: white;
+  margin-top: auto; /* Pousse le footer vers le bas si le contenu est insuffisant */
   text-align: center;
   padding: 1rem 0;
   font-size: 0.9rem;
-  border-top: 1px solid #67696c;
+  background-color: var(--primary-color);
+}
+
+.homepage-footer p {
+  color: white;
+  margin: auto;
 }

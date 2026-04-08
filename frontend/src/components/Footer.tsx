@@ -10,7 +10,7 @@ interface FooterProps {
 
 const Footer: React.FC<FooterProps> = ({ isDark }) => {
   return (
-    <footer className={`homepage-footer da-color ${isDark ? 'dark' : 'light'}`}>
+    <footer className={`homepage-footer ${isDark ? 'dark' : 'light'}`}>
       <p>&copy; 2026 Trello-Like. Tous droits réservés.</p>
     </footer>
   );

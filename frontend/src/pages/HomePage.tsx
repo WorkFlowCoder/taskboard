@@ -7,7 +7,7 @@ import './HomePage.css';
 const HomePage: React.FC = () => {
   return (
     <div className="homepage">
-      <header className="homepage-header da-color">
+      <header className="homepage-header">
         <h1>Bienvenue sur Trello-Like</h1>
         <p>Votre outil ultime pour gérer vos projets et collaborer avec vos équipes.</p>
         <button className="cta-button">Commencer Maintenant</button>

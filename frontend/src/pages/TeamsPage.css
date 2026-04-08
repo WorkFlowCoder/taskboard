@@ -1,7 +1,11 @@
 .teams-page {
   padding: 20px;
-  background-color: #f9f9f9;
-  color: #333;
+  background-color: var(--white-color);
+  color: var(--black-color);
+}
+
+.teams-page p{
+  color: var(--black-color);
 }
 
 .teams-page h1 {

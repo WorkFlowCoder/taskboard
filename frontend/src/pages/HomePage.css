@@ -19,22 +19,25 @@
 .homepage-header {
   text-align: center;
   padding: 2rem;
-  color: white;
+  color: var(--white-color);
+  background-color: var(--primary-color);
 }
 
 .homepage-header h1 {
   font-size: 2.5rem;
   margin-bottom: 1rem;
+  color: white;
 }
 
 .homepage-header p {
   font-size: 1.2rem;
   margin-bottom: 2rem;
+  color: white;
 }
 
 .cta-button {
-  background-color: #ffffff;
-  color: black;
+  background-color: var(--white-color);
+  color: var(--black-color);
   padding: 0.8rem 1.5rem;
   border: none;
   border-radius: 5px;
@@ -46,26 +49,26 @@
 .features {
   display: flex;
   justify-content: space-around;
-  background-color: white;
+  background-color: var(--white-color);
   gap: 2rem;
   padding: 2rem;
 }
 
 .feature {
-  background-color: #ffffff;
-  border: 1px solid #a6a7a9;
+  border: 1px solid var(--primary-color);
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px var(--primary-color);
   text-align: center;
   padding: 1.5rem;
   max-width: 300px;
   transition: transform 0.3s, box-shadow 0.3s;
   color: var(--primary-color);
+  background-color: white;
 }
 
 .feature:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 10px var(--black-color);
 }
 
 .feature svg {

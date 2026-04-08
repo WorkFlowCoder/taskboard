@@ -1,16 +1,7 @@
-/* Variables CSS pour les couleurs */
-:root {
-  --bg-color: #ffffff;
-  --text-color: #333333;
-  --navbar-bg: #ffffff;
-  --navbar-text: #333333;
-}
-
 /* Styles pour une Navbar moderne et blanche */
 .navbar {
   width: 100%; /* Prend toute la largeur de l'écran */
-  background-color: var(--navbar-bg);
-  color: var(--navbar-text);
+  background-color: var(--white-color);
   padding: 0 2rem; /* Ajustement du padding pour correspondre à la nouvelle hauteur */
   display: flex;
   justify-content: space-between; /* Répartit les éléments correctement */
@@ -31,7 +22,7 @@
 .navbar-title {
   font-size: 1.8rem;
   font-weight: bold;
-  color: #333333;
+  color: var(--black-color);
 }
 
 .navbar-logo {
@@ -47,7 +38,6 @@
 }
 
 .navbar-links {
-  margin-left: 2rem; /* Ajout d'un espacement entre le titre et les liens */
   list-style: none;
   display: flex;
   gap: 1rem;
@@ -62,7 +52,8 @@
 }
 
 .navbar-links li a {
-  color: #333333;
+  color: var(--black-color);
+  background-color: var(--white-color);
   text-decoration: none;
   font-size: 1rem;
   font-weight: 500;
@@ -101,54 +92,6 @@
   display: flex;
   align-items: center;
   gap: 1rem; /* Espacement réduit entre le titre et les liens */
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .navbar {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 1rem;
-  }
-
-  .navbar-links {
-    flex-direction: column;
-    gap: 1rem;
-    width: 100%;
-  }
-
-  .navbar-links li {
-    width: 100%;
-  }
-
-  .navbar-links li a {
-    display: block;
-    padding: 0.5rem 1rem;
-    width: 100%;
-    border-radius: 4px;
-    background-color: #f9f9f9;
-  }
-
-  .navbar-links li a:hover {
-    background-color: #eaeaea;
-  }
-
-  .navbar-options {
-    flex-direction: row;
-    justify-content: flex-end;
-    width: 100%;
-  }
-}
-
-/* Styles pour le mode sombre */
-body.dark-theme {
-  background-color: #121212;
-  color: #ffffff;
-}
-
-.navbar {
-  background-color: #ffffff;
-  color: #333333;
 }
 
 body.dark-theme .navbar {

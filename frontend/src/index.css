@@ -2,10 +2,28 @@ html, body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  background-color: var(--white-color);
+  height: 100%;
 }
 
-:root {
-  --primary-color: #6a0dad; /* Déclare une variable pour une couleur */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.light {
+  /* Couleur pour le thème clair */
+  --primary-color: #6a0dad;
+  --black-color: #000000;
+  --white-color: #ffffff;
+}
+
+.dark {
+   /* Couleur pour le thème sombre */
+  --primary-color: #6a0dad;
+  --black-color: #ffffff;
+  --white-color: #000000;
 }
 
 /* Ajout d'un style pour le footer afin de s'assurer qu'il n'y a pas de rebord blanc */
@@ -22,8 +40,4 @@ footer {
 /* Appliquer la classe globalement */
 svg.lucide {
   color: var(--primary-color);
-}
-
-.da-color {
-  background-color: var(--primary-color);
 }
