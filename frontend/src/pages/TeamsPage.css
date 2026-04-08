@@ -21,3 +21,84 @@
 .teams-page li {
   margin-bottom: 5px;
 }
+
+.boards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.board-card {
+  background-color: var(--light-gray-color);
+  border: 1px solid var(--gray-color);
+  border-radius: 8px;
+  padding: 15px;
+  width: 300px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.board-card h2 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.teams-list {
+  display: block;
+  margin-top: 20px;
+}
+
+.board-section {
+  margin-bottom: 30px;
+  padding: 15px;
+  border: 1px solid var(--gray-color); /* Added border for each project */
+  border-radius: 8px; /* Rounded corners for better visuals */
+  background-color: var(--light-gray-color); /* Subtle background color */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
+}
+
+.board-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+.members-list {
+  list-style: none;
+  padding: 0;
+}
+
+.member-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.member-item .role {
+  font-style: italic;
+  color: var(--dark-gray-color);
+}
+
+.edit-role-button {
+  background-color: var(--primary-color);
+  color: var(--white-color);
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.edit-role-button:disabled {
+  background-color: var(--gray-color);
+  cursor: not-allowed;
+}
+
+.add-member-button {
+  background-color: var(--secondary-color);
+  color: var(--white-color);
+  border: none;
+  border-radius: 4px;
+  padding: 10px;
+  cursor: pointer;
+  margin-top: 10px;
+  width: 100%;
+}

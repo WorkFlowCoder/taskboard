@@ -104,24 +104,18 @@ const BoardsPage: React.FC = () => {
       {isAuthenticated ? (
         boards.length > 0 ? (
           <ul>
-            {boards.map((board, index) => (
-              <li
-                key={board.board_id || index}
-                className={editingBoardId === board.board_id ? 'editing' : ''}
-              >
+            {boards.map((board) => (
+              <li key={board.board_id} className={editingBoardId === board.board_id ? 'editing' : ''}>
                 <div className="board-item relative">
                   <div>
                     {editingBoardId === board.board_id ? (
-                      <h3
-                        contentEditable
-                        suppressContentEditableWarning
-                        onBlur={(e) =>
-                          setEditedBoard((prev) => ({ ...prev, title: e.target.textContent || '' }))
+                      <input
+                        type="text"
+                        value={editedBoard.title}
+                        onChange={(e) => setEditedBoard((prev) => ({ ...prev, title: e.target.value }))
                         }
                         className="editable-title"
-                      >
-                        <Edit3 /> {editedBoard.title || 'Sans titre'}
-                      </h3>
+                      />
                     ) : (
                       <h3
                         onClick={() => !editingBoardId && handleBoardClick(board.board_id)}
@@ -131,16 +125,12 @@ const BoardsPage: React.FC = () => {
                       </h3>
                     )}
                     {editingBoardId === board.board_id ? (
-                      <p
-                        contentEditable
-                        suppressContentEditableWarning
-                        onBlur={(e) =>
-                          setEditedBoard((prev) => ({ ...prev, description: e.target.textContent || '' }))
+                      <textarea
+                        value={editedBoard.description}
+                        onChange={(e) => setEditedBoard((prev) => ({ ...prev, description: e.target.value }))
                         }
                         className="editable-description"
-                      >
-                        <Edit3 /> {editedBoard.description || 'Aucune description'}
-                      </p>
+                      />
                     ) : (
                       <p>{board.description || 'Aucune description'}</p>
                     )}

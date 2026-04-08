@@ -3,3 +3,61 @@
   background-color: var(--white-color);
   color: var(--black-color);
 }
+
+.projects-page h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.projects-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.projects-list {
+  display: block;
+  margin-top: 20px;
+}
+
+.board-section {
+  margin-bottom: 30px;
+  padding: 15px;
+  border: 1px solid var(--gray-color); /* Added border for each project */
+  border-radius: 8px; /* Rounded corners for better visuals */
+  background-color: var(--light-gray-color); /* Subtle background color */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
+}
+
+.board-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+.progress-bar {
+  background-color: var(--gray-color);
+  border-radius: 4px;
+  height: 10px;
+  width: 100%;
+  margin: 5px 0;
+  overflow: hidden;
+}
+
+.progress {
+  background-color: var(--primary-color);
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.list-item {
+  margin-bottom: 15px;
+}
+
+.lists-details {
+  list-style: none;
+  padding: 0;
+}
+
+.lists-details li {
+  margin-bottom: 5px;
+}

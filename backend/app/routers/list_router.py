@@ -3,33 +3,12 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas.list import ListCreate, ListUpdate, ListResponse
 from app.models import List, User, BoardMember
-from jose import jwt, JWTError
-from app.utils.auth import SECRET_KEY, ALGORITHM
+from app.utils.auth import SECRET_KEY, ALGORITHM, get_current_user
 import logging
 
 router = APIRouter(prefix="/lists", tags=["Lists"])
 
 logger = logging.getLogger("uvicorn")
-
-def get_current_user(authorization: str = Header(...), db: Session = Depends(get_db)):
-    try:
-        scheme, token = authorization.split()
-        if scheme.lower() != "bearer":
-            raise HTTPException(status_code=401, detail="Schéma d'authentification invalide")
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_email: str = payload.get("sub")
-        if user_email is None:
-            raise HTTPException(status_code=401, detail="Token invalide")
-
-        user = db.query(User).filter(User.email == user_email).first()
-        if user is None:
-            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
-
-        return user.user_id
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Token invalide")
-    except ValueError:
-        raise HTTPException(status_code=401, detail="En-tête Authorization mal formé")
 
 @router.post("/", response_model=ListResponse)
 def create_list(list_data: ListCreate, current_user: str = Depends(get_current_user), db: Session = Depends(get_db)):

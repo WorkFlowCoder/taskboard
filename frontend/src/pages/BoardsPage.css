@@ -5,6 +5,8 @@
   padding: 20px;
   background-color: var(--white-color);
   color: var(--black-color);
+  display: block; /* Remove flexbox */
+  align-items: stretch;
 }
 
 .boards-page h1 {
@@ -55,8 +57,13 @@ ul {
   padding: 15px;
   border-radius: 10px;
   display: flex;
+  flex-grow: 1;
   justify-content: space-between; /* Sépare le contenu principal et les boutons */
   align-items: center; /* Aligne verticalement les éléments */
+}
+
+.board-item div {
+  width:100%;
 }
 
 .board-item .button-group {
@@ -133,7 +140,7 @@ button.delete {
 }
 
 button.delete svg.lucide, button.edit svg.lucide, button.cancel svg.lucide, button.save svg.lucide {
-  color: var(--black-color);
+  color: white;
 }
 
 button.delete:hover {
@@ -154,20 +161,6 @@ button.delete:hover {
   color: #856404;
   font-weight: bold;
   z-index: 1000; /* Ensure it appears above other elements */
-}
-
-/* Style for editing indicator SVG */
-.editing-indicator svg {
-  margin-right: 5px;
-  color: orange;
-}
-
-/* Style for the Edit3 icon */
-.editable-title svg,
-.editable-description svg {
-  margin-right: 5px;
-  vertical-align: middle;
-  color: orange;
 }
 
 /* Style for editable title and description during editing */
@@ -205,4 +198,14 @@ button.delete:hover {
   border: 2px solid orange; /* Orange frame */
   border-radius: 8px; /* Optional: Add rounded corners */
   padding: 10px; /* Optional: Add spacing inside the frame */
+}
+
+.boards-page textarea {
+  border: none;
+  resize: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  width: 100%;
 }
