@@ -29,7 +29,6 @@ const ViewBoard: React.FC = () => {
 
         const data = await fetchBoardById(id!, authToken);
         setBoard(data);
-        console.log(data);
       } catch (err: any) {
         setError(err.message);
       }

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.schemas.user import UserCreate, LoginRequest, UserResponse
+from app.schemas.user import UserCreate, LoginRequest, UserResponse, UserUpdate
 from app.models.user import User as UserModel
 from app.utils.database import get_db
 from app.utils.auth import get_current_user, hash_password, create_access_token, verify_password
@@ -9,7 +9,7 @@ from app.utils.auth import get_current_user, hash_password, create_access_token,
 router = APIRouter(tags=["Users"])
 
 # Route pour enregistrer un nouvel utilisateur
-@router.post("/register", response_model=UserResponse)
+@router.post("/register")
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
     # Vérifie si l'utilisateur existe déjà
     existing_user = db.query(UserModel).filter(UserModel.email == user.email).first()
@@ -36,9 +36,12 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 
     # Retourne les informations de l'utilisateur créé avec un token JWT et les initiales
     return {
+        "first_name": new_user.first_name,
+        "last_name": new_user.last_name,
+        "email": new_user.email,
+        "initials": initials,
         "access_token": token,
-        "token_type": "bearer",
-        "initials": initials
+        "token_type": "bearer"
     }
 
 # Route pour connecter un utilisateur
@@ -72,9 +75,56 @@ def get_profile(current_user: str = Depends(get_current_user), db: Session = Dep
     initials = f"{user.first_name[0].upper()}{user.last_name[0].upper()}"
 
     return {
-        "id": user.user_id,  # Include the required id field
+        "id": user.user_id,
         "first_name": user.first_name,
         "last_name": user.last_name,
         "email": user.email,
         "initials": initials
+    }
+
+# Route pour supprimer un compte utilisateur à partir d'un token
+@router.delete("/delete-account")
+def delete_account(current_user: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Récupère l'utilisateur actuel
+    user = db.query(UserModel).filter(UserModel.user_id == current_user).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+
+    # Supprime l'utilisateur de la base de données
+    db.delete(user)
+    db.commit()
+
+    return {"message": "Compte supprimé avec succès"}
+
+# Route pour modifier un compte utilisateur
+@router.put("/update-account")
+def update_account(
+    user_update: UserUpdate,  # Utilisation d'un schéma Pydantic pour les données JSON
+    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    # Récupère l'utilisateur actuel
+    user = db.query(UserModel).filter(UserModel.user_id == current_user).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+
+    # Met à jour les informations de l'utilisateur
+    user.first_name = user_update.first_name
+    user.last_name = user_update.last_name
+    user.email = user_update.email
+    db.commit()
+    db.refresh(user)
+
+    # Calcule les initiales de l'utilisateur
+    initials = f"{user.first_name[0].upper()}{user.last_name[0].upper()}"
+
+    token = create_access_token({"sub": user.email})
+
+    return {
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "email": user.email,
+        "initials": initials,
+        "access_token": token,
+        "token_type": "bearer"
     }

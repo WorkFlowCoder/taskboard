@@ -64,3 +64,39 @@ export const getUserProfile = async (token: string) => {
     throw error;
   }
 };
+
+// Fonction pour supprimer un compte utilisateur
+export const deleteUserAccount = async (token: string) => {
+    const response = await fetch(API_BASE_URL + "/delete-account", {
+        method: 'DELETE',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Une erreur est survenue lors de la suppression du compte.');
+    }
+
+    return response.json(); // Retourne les données de la réponse
+};
+
+// Fonction pour mettre à jour un compte utilisateur
+export const updateUserAccount = async (token: string, firstName: string, lastName: string, email: string) => {
+    const response = await fetch(API_BASE_URL + "/update-account", {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ first_name: firstName, last_name: lastName, email }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Une erreur est survenue lors de la mise à jour du compte.');
+    }
+
+    return response.json(); // Retourne les données de la réponse
+};

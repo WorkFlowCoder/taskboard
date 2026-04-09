@@ -23,7 +23,6 @@ const BoardsPage: React.FC = () => {
         try {
           const data = await fetchAllBoards(authToken); // Récupère les tableaux via le service
           setBoards(data);
-          //console.log(data);
         } catch (err: any) {
           console.error('Erreur lors de la récupération des boards:', err);
           setError(err.message); // Gère les erreurs lors de la récupération des données
@@ -72,7 +71,6 @@ const BoardsPage: React.FC = () => {
   const handleSaveEdit = async (boardId) => {
     try {
       await updateBoard(boardId, editedBoard.title, editedBoard.description, authToken);
-      console.log('Board updated successfully');
       setEditingBoardId(null); // Quitte le mode édition
       const updatedBoards = boards.map((board) =>
         board.board_id === boardId

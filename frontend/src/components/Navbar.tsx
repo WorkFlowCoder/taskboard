@@ -15,7 +15,7 @@ interface NavbarProps {
 // Permet de naviguer entre les différentes sections et de gérer les options utilisateur
 
 const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme }) => {
-  const { isAuthenticated, logout, initials } = useAuth(); // Gestion de l'état d'authentification
+  const { isAuthenticated, logout, initials, srcImg } = useAuth(); // Gestion de l'état d'authentification
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false); // État pour afficher ou masquer la modal d'authentification
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // État pour gérer l'affichage du menu déroulant
 
@@ -32,11 +32,6 @@ const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme }) => {
   // Fonction pour basculer l'affichage du menu déroulant
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
-  };
-
-  // Générer l'URL de l'avatar à partir des initiales
-  const getAvatarUrl = (initials: string) => {
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=6a0dad&color=ffffff`;
   };
 
   return (
@@ -61,7 +56,7 @@ const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme }) => {
           <div className="auth-info">
             <div className="dropdown" onClick={toggleDropdown}>
               <img
-                src={getAvatarUrl(initials)}
+                src={srcImg}
                 alt="User Avatar"
                 className="user-avatar"
               />

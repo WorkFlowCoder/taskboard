@@ -13,9 +13,16 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
+# Schéma pour la mise à jour d'un utilisateur
+class UserUpdate(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+
 # Schéma pour les réponses utilisateur
 class UserResponse(BaseModel):
     id: int
     first_name: str
     last_name: str
     email: str
+    initials: str
