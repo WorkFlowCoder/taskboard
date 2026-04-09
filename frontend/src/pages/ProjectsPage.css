@@ -22,16 +22,20 @@
 
 .board-section {
   margin-bottom: 30px;
-  padding: 15px;
-  border: 1px solid var(--gray-color); /* Added border for each project */
-  border-radius: 8px; /* Rounded corners for better visuals */
-  background-color: var(--light-gray-color); /* Subtle background color */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
+  padding: 10px;
+  border: 1px solid var(--primary-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px var(--primary-color);
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
+  background-color: white;
+  color: var(--primary-color);
 }
 
-.board-section h2 {
-  font-size: 1.8rem;
-  margin-bottom: 10px;
+.board-section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 10px var(--black-color);
 }
 
 .progress-bar {

@@ -110,3 +110,24 @@ export const updateBoard = async (
     throw error;
   }
 };
+
+export const getBoardStats = async (token: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/boards/stats`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Erreur lors de la récupération des statistiques des boards');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Erreur lors de la récupération des statistiques des boards:", error);
+    throw error;
+  }
+};

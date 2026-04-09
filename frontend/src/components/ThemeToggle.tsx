@@ -7,11 +7,21 @@ interface ThemeToggleProps {
 
 // Composant ThemeToggle pour basculer entre les thèmes clair et sombre
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ isDark, toggleTheme }) => {
+  const themeToggleStyle = {
+    padding: "0px",
+    paddingTop: "5px",
+    paddingBottom: "5px",
+    border: "none",
+    background: "transparent",
+    borderRadius: "50%",
+    outline: "none",
+  };
+
   return (
     <button 
       onClick={toggleTheme} // Appelle la fonction pour changer de thème
-      className="p-2 hover:bg-gray-100 rounded-full" // Style du bouton
-      style={{ outline: 'none', border: 'none', background: 'transparent' }}> {/* Bouton transparent */}
+      style={themeToggleStyle} // Style du bouton
+    >
       {isDark ? <Sun size={24} className="lucide-icon" /> : <Moon size={24} className="lucide-icon" />} {/* Affiche une icône selon le thème */}
     </button>
   );

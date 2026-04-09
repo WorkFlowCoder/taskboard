@@ -13,15 +13,68 @@ router = APIRouter()
 # Route pour récupérer tous les tableaux d'un utilisateur
 @router.get("/boards")
 def get_user_boards(current_user: str = Depends(get_current_user), db: Session = Depends(get_db)):
-    boards = db.query(Board).filter(Board.user_id == current_user).all()
+    boards = db.query(Board).join(BoardMember, Board.board_id == BoardMember.board_id).filter(BoardMember.user_id == current_user).all()
     if not boards:
         raise HTTPException(status_code=404, detail="Aucun board trouvé pour cet utilisateur")
     return boards
 
+# Route pour récupérer les statistiques de tous les boards de l'utilisateur
+@router.get("/boards/stats")
+def get_boards_stats(current_user: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Récupérer tous les boards où l'utilisateur est membre
+    logger.info(f"Récupération des statistiques pour user_id: {current_user}")
+    boards = db.query(Board).join(BoardMember, Board.board_id == BoardMember.board_id).filter(BoardMember.user_id == current_user).all()
+    logger.info(f"Boards trouvés: {len(boards)} pour user_id: {current_user}")
+    if not boards:
+        raise HTTPException(status_code=404, detail="Aucun board trouvé pour cet utilisateur")
+
+    stats = []
+
+    for board in boards:
+        # Récupérer le nombre total de cartes sur le board
+        total_cards = db.execute(
+            text(
+                """
+                SELECT COUNT(*) AS total_cards
+                FROM cards c
+                JOIN lists l ON c.list_id = l.list_id
+                WHERE l.board_id = :board_id
+                """
+            ),
+            {"board_id": board.board_id}
+        ).scalar()
+
+        # Récupérer le nombre de cartes par liste
+        cards_per_list = db.execute(
+            text(
+                """
+                SELECT l.list_id AS list_id, l.title AS list_title, COUNT(c.card_id) AS card_count
+                FROM lists l
+                LEFT JOIN cards c ON l.list_id = c.list_id
+                WHERE l.board_id = :board_id
+                GROUP BY l.list_id, l.title
+                ORDER BY l.position ASC
+                """
+            ),
+            {"board_id": board.board_id}
+        ).fetchall()
+
+        # Transformer les résultats en dictionnaires
+        cards_per_list_dict = [dict(row._mapping) for row in cards_per_list]
+
+        stats.append({
+            "board_id": board.board_id,
+            "board_title": board.title,
+            "total_cards": total_cards,
+            "cards_per_list": cards_per_list_dict
+        })
+
+    return stats
+
 # Route pour récupérer un board par son ID
 @router.get("/boards/{board_id}")
 def get_board_by_id(board_id: str, current_user: str = Depends(get_current_user), db: Session = Depends(get_db)):
-    board = db.query(Board).filter(Board.board_id == board_id, Board.user_id == current_user).first()
+    board = db.query(Board).join(BoardMember, Board.board_id == BoardMember.board_id).filter(Board.board_id == board_id, BoardMember.user_id == current_user).first()
     if not board:
         logger.warning(f"Board not found or does not belong to user_id: {current_user}")
         raise HTTPException(status_code=404, detail="Board introuvable ou non autorisé")

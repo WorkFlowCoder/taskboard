@@ -6,6 +6,7 @@ import BoardsPage from './pages/BoardsPage';
 import TeamsPage from './pages/TeamsPage';
 import ProjectsPage from './pages/ProjectsPage';
 import ViewBoard from './pages/ViewBoard';
+import ProfilePage from './pages/ProfilePage';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
@@ -41,6 +42,7 @@ const App: React.FC = () => {
         <Route path="/boards" element={<BoardsPage />} />
         <Route path="/boards/:id" element={<ViewBoard />} />
         <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/profil" element={<ProfilePage />} />
       </Routes>
       <Footer isDark={isDark} />
     </Router>

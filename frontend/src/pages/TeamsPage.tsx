@@ -36,7 +36,7 @@ const TeamsPage: React.FC = () => {
         ) : boards.length > 0 ? (
           <div className="teams-list">
             {boards.map((board: any, boardIndex: number) => (
-              <div key={board.id || `board-${boardIndex}`} className="board-section">
+              <div key={board.id || `board-${boardIndex}`} className="team-section">
                 <h2>{board.title}</h2>
                 <ul className="members-list">
                   {board.members.map((member: any, memberIndex: number) => (

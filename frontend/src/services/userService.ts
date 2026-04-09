@@ -36,3 +36,31 @@ export const loginUser = async (email: string, password: string) => {
 
     return response.json(); // Retourne les données de la réponse
 };
+
+// Fonction pour récupérer le profil de l'utilisateur
+export const getUserProfile = async (token: string) => {
+  try {
+    const response = await fetch(API_BASE_URL+"/profile", {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return await response.json();
+    } else {
+      const text = await response.text(); // Log the response body for debugging
+      console.error('Unexpected response format:', text);
+      throw new Error('Unexpected response format: Not JSON');
+    }
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    throw error;
+  }
+};

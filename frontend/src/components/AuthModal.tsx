@@ -66,8 +66,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
             const data = isLogin
               ? await loginUser(email, password)
               : await registerUser(firstName, lastName, email, password);
-            // Appeler la méthode login avec le jeton
-            login(data.access_token);
+            // Appeler la méthode login avec le jeton et les informations utilisateur
+            login(data.access_token, data.initials);
             // Fermer la modal après succès
             onClose();
         } catch (error: any) {

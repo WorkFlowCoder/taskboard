@@ -1,76 +1,52 @@
 import React, { useEffect, useState } from 'react';
 import './ProjectsPage.css';
+import { getBoardStats } from '../services/boardService';
 
 const ProjectsPage: React.FC = () => {
   const [boards, setBoards] = useState([]);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchBoards = async () => {
+    const fetchStats = async () => {
       try {
-        // Simulated API call to fetch boards with lists and cards
-        const data = [
-          {
-            id: 1,
-            title: 'Board Alpha',
-            totalCards: 100,
-            lists: [
-              { name: 'À faire', cards: 25 },
-              { name: 'En cours', cards: 50 },
-              { name: 'Terminé', cards: 25 },
-            ],
-          },
-          {
-            id: 2,
-            title: 'Board Beta',
-            totalCards: 50,
-            lists: [
-              { name: 'À faire', cards: 10 },
-              { name: 'En cours', cards: 20 },
-              { name: 'Terminé', cards: 20 },
-            ],
-          },
-        ];
-        setBoards(data);
-      } catch (err: any) {
-        console.error('Error fetching boards:', err);
-        setError(err.message);
+        const token = localStorage.getItem("authToken"); // Assurez-vous que le token est stocké dans localStorage
+        if (token) {
+          const stats = await getBoardStats(token);
+          setBoards(stats); // Met à jour l'état avec les données des boards
+        } else {
+          console.error("Aucun token trouvé dans le localStorage");
+        }
+      } catch (error) {
+        console.error("Erreur lors de la récupération des statistiques des boards:", error);
       }
     };
 
-    fetchBoards();
+    fetchStats();
   }, []);
 
   return (
     <div className="projects-page">
       <h1>Projets</h1>
-      {error ? (
-        <p className="error-message">Erreur : {error}</p>
-      ) : (
-        <div className="projects-list">
-          {boards.map((board) => (
-            <div key={board.id} className="board-section">
-              <h2>{board.title}</h2>
-              <ul className="lists-details">
-                {board.lists.map((list, index) => {
-                  const progress = (list.cards / board.totalCards) * 100;
-                  return (
-                    <li key={index} className="list-item">
-                      <span>{list.name} : {list.cards} cartes</span>
-                      <div className="progress-bar">
-                        <div
-                          className="progress"
-                          style={{ width: `${progress}%` }}
-                        ></div>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
+      {boards.map((board) => (
+        <div key={board.board_id} className="board-section">
+          <h2>{board.board_title}</h2>
+          <p>Total Cards: {board.total_cards}</p>
+          <ul>
+            {board.cards_per_list.map((list) => (
+              <li key={list.list_id} className="list-item">
+                <div className="list-progress">
+                  <span>{list.list_title}: {list.card_count} cards</span>
+                  <div className="progress-bar">
+                    <div
+                      className="progress"
+                      style={{ width: `${(list.card_count / board.total_cards) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
-      )}
+      ))}
     </div>
   );
 };
