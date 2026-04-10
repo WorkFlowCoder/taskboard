@@ -38,15 +38,27 @@ const TeamsPage: React.FC = () => {
             {boards.map((board: any, boardIndex: number) => (
               <div key={board.id || `board-${boardIndex}`} className="team-section">
                 <h2>{board.title}</h2>
-                <ul className="members-list">
-                  {board.members.map((member: any, memberIndex: number) => (
-                    <li key={member.id || `member-${boardIndex}-${memberIndex}`} className="member-item">
-                      <span>{member.first_name} {member.last_name}</span>
-                      <span className="role">{member.role}</span>
-                      <button className="edit-role-button" disabled={member.isSelf}>Modifier Rôle</button>
-                    </li>
-                  ))}
-                </ul>
+                <table className="members-table">
+                  <thead>
+                    <tr>
+                      <th>Utilisateur</th>
+                      <th className="role">Rôle</th>
+                      <th className="actions-column">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {board.members.map((member: any, memberIndex: number) => (
+                      <tr key={member.id || `member-${boardIndex}-${memberIndex}`} className="member-row">
+                        <td>{member.first_name} {member.last_name}</td>
+                        <td className="role">{member.role}</td>
+                        <td className="actions-column">
+                          <button className="edit-role-button" disabled={member.isSelf}>Modifier Rôle</button>
+                          <button className="delete-user-button">Supprimer</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
                 <button className="add-member-button">Ajouter un membre</button>
               </div>
             ))}

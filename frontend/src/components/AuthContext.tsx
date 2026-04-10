@@ -34,6 +34,7 @@ export const AuthProvider = ({ children }) => {
     setInitials(initials);
     localStorage.setItem('authToken', token); // Stocke le token dans le stockage local
     localStorage.setItem('initials', initials); // Stocke les initiales dans le stockage local
+    setSrcImg(`https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=6a0dad&color=ffffff`); // Met à jour l'URL de l'image de profil
   };
 
   // Fonction pour déconnecter un utilisateur
@@ -41,6 +42,7 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     setAuthToken(null);
     setInitials(null);
+    setSrcImg(null);
     localStorage.removeItem('authToken'); // Supprime le token du stockage local
     localStorage.removeItem('initials'); // Supprime les initiales du stockage local
   };

@@ -109,30 +109,82 @@
 }
 
 .edit-role-button {
-  background-color: var(--primary-color);
+  background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 4px;
   padding: 5px 10px;
   cursor: pointer;
+  border-radius: 4px;
 }
 
 .edit-role-button:disabled {
-  background-color: var(--gray-color);
+  background-color: #ccc;
   cursor: not-allowed;
 }
 
 .add-member-button {
-  color: black;
-  background-color: orange;
+  margin-top: 10px;
+  background-color: var(--primary-color);
+  color: white;
   border: none;
-  border-radius: 8px;
   padding: 10px 15px;
   cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s;
+  border-radius: 4px;
 }
 
-.add-member-button:hover {
-  background-color: var(--secondary-hover-color);
+.members-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.members-table th, .members-table td {
+  padding: 12px;
+  text-align: left;
+}
+
+.members-table th {
+  background-color: white;
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+.role {
+  text-align: center !important;
+}
+
+.members-table td.actions-column {
+  text-align: right;
+  white-space: nowrap;
+  padding-right: 20px; /* Added extra padding to push buttons further to the right */
+}
+
+.members-table th.actions-column {
+  display: none;
+}
+
+.members-table tr {
+  background-color: white;
+}
+
+.members-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+.members-table tr:last-child {
+  border-bottom: none;
+}
+
+.delete-user-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-left: 5px;
+}
+
+.delete-user-button:hover {
+  background-color: #c82333;
 }
