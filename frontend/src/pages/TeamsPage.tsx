@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { deleteBoardMember, fetchUserBoardsWithMembers } from '../services/memberService';
+import { deleteBoardMember, updateMemberRole, fetchUserBoardsWithMembers } from '../services/memberService';
 import './TeamsPage.css';
 import { useAuth } from '../components/AuthContext';
 import type { Board } from '../types/Objects';
@@ -10,6 +10,17 @@ const TeamsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<{ board_id: number; user_id: number; first_name: string; last_name: string } | null>(null);
+  const [editingRole, setEditingRole] = useState<{ board_id: number; user_id: number; role: string } | null>(null);
+
+  const refreshBoards = async () => {
+    try {
+      const updatedBoards = await fetchUserBoardsWithMembers(authToken);
+      setBoards(updatedBoards);
+    } catch (err: any) {
+      console.error('Error refreshing boards:', err);
+      setError(err.message);
+    }
+  };
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -62,6 +73,39 @@ const TeamsPage: React.FC = () => {
     setSelectedMember(null);
   };
 
+  const handleEditRoleClick = (board_id: number, user_id: number, role: string) => {
+    setEditingRole({ board_id, user_id, role });
+  };
+
+  const handleRoleChange = (newRole: string) => {
+    if (editingRole) {
+      setEditingRole((prev) => prev ? { ...prev, role: newRole } : null);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingRole(null);
+  };
+
+  const handleSaveRole = async () => {
+    if (editingRole) {
+      try {
+        if (!isAuthenticated) throw new Error('Utilisateur non authentifié.');
+        await updateMemberRole(editingRole.board_id, editingRole.user_id, editingRole.role, authToken);
+
+        // Refresh boards after updating the role
+        await refreshBoards();
+        setEditingRole(null);
+      } catch (error) {
+        console.error('Erreur lors de la mise à jour du rôle :', error);
+      }
+    }
+  };
+
+  const handleDeleteMember = (board_id: number, user_id: number, first_name: string, last_name: string) => {
+    handleDeleteClick({ board_id, user_id, first_name, last_name });
+  };
+
   return (
     <div className="teams-page">
       <h1>Équipes</h1>
@@ -85,17 +129,55 @@ const TeamsPage: React.FC = () => {
                     {board.members.map((member, memberIndex) => (
                       <tr key={member.user_id || `member-${boardIndex}-${memberIndex}`} className="member-row">
                         <td>{member.first_name} {member.last_name}</td>
-                        <td className="role">{board.user_id === member.user_id ? 'Propriétaire' : member.role}</td>
+                        <td className="role">
+                          {editingRole && editingRole.user_id === member.user_id && editingRole.board_id === board.board_id ? (
+                            <select
+                              value={editingRole.role}
+                              onChange={(e) => handleRoleChange(e.target.value)}
+                            >
+                              <option value="member">Membre</option>
+                              <option value="admin">Admin</option>
+                              {board.user_id === board.requester_user_id && <option value="owner">Propriétaire</option>}
+                            </select>
+                          ) : (
+                            <span>{board.user_id === member.user_id ? 'Propriétaire' : member.role}</span>
+                          )}
+                        </td>
                         {board.requester_role === 'admin' && board.user_id !== member.user_id && (
                           (board.user_id === board.requester_user_id || member.role !== 'admin') && (
                             <td className="actions-column">
-                              <button className="edit-role-button" disabled={member.user_id===board.requester_user_id}>Modifier Rôle</button>
-                              <button
-                                className="delete-user-button"
-                                onClick={() => handleDeleteClick({ board_id: board.board_id, user_id: member.user_id, first_name: member.first_name, last_name: member.last_name })}
-                              >
-                                Supprimer
-                              </button>
+                              {editingRole && editingRole.user_id === member.user_id && editingRole.board_id === board.board_id ? (
+                                <>
+                                  <button
+                                    className="cancel-edit-button"
+                                    onClick={handleCancelEdit}
+                                  >
+                                    Annuler
+                                  </button>
+                                  <button
+                                    className="save-role-button"
+                                    onClick={handleSaveRole}
+                                  >
+                                    Sauvegarder
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <button
+                                    className="edit-role-button"
+                                    onClick={() => handleEditRoleClick(board.board_id, member.user_id, member.role)}
+                                    disabled={member.user_id === board.requester_user_id}
+                                  >
+                                    Modifier Rôle
+                                  </button>
+                                  <button
+                                    className="delete-user-button"
+                                    onClick={() => handleDeleteMember(board.board_id, member.user_id, member.first_name, member.last_name)}
+                                  >
+                                    Supprimer
+                                  </button>
+                                </>
+                              )}
                             </td>
                           )
                         )}

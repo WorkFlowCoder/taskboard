@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..utils.auth import get_current_user
@@ -5,8 +6,91 @@ from ..database import get_db
 from ..models.board_member import BoardMember
 from ..models.board import Board
 from ..models.user import User
+from ..schemas.member import UpdateRoleRequest  # Import the schema from the new location
+from pydantic import BaseModel, validator
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/members", tags=["Members"])
+
+class UpdateRoleRequest(BaseModel):
+    new_role: str
+
+    @validator("new_role")
+    def validate_role(cls, value):
+        if value not in ["admin", "member", "owner"]:
+            raise ValueError("Invalid role. Role must be 'admin', 'member', or 'owner'.")
+        return value
+
+@router.put("/{board_id}/member/{user_id}/role", status_code=200)
+def update_member_role(
+    board_id: int,
+    user_id: int,
+    request: UpdateRoleRequest,  # Use the Pydantic model for validation
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
+):
+    """
+    Update the role of a member on a board. Only admins or the board owner can perform this action.
+    """
+    new_role = request.new_role  # Extract the validated role
+    logger.info(f"Request data: board_id={board_id}, user_id={user_id}, new_role={new_role}")
+
+    # Check if the board exists and the current user has the right permissions
+    board = db.query(Board).filter(Board.board_id == board_id).first()
+    if not board:
+        raise HTTPException(status_code=404, detail="Board not found.")
+
+    board_member = (
+        db.query(BoardMember)
+        .filter(BoardMember.board_id == board_id, BoardMember.user_id == current_user)
+        .first()
+    )
+
+    if not board_member:
+        raise HTTPException(status_code=404, detail="Board not found or access denied.")
+
+    # Rule: A member cannot make modifications
+    if board_member.role == "member":
+        raise HTTPException(status_code=403, detail="Members cannot modify roles.")
+
+    # Ensure the user being updated exists
+    member_to_update = (
+        db.query(BoardMember)
+        .filter(BoardMember.board_id == board_id, BoardMember.user_id == user_id)
+        .first()
+    )
+
+    if not member_to_update:
+        raise HTTPException(status_code=404, detail="Member not found.")
+
+    # Rule: Only the board owner can assign the owner role
+    if new_role == "owner" and board.user_id != current_user:
+        raise HTTPException(status_code=403, detail="Only the board owner can assign the owner role.")
+
+    # Rule: Only the board owner can demote an admin to member
+    if member_to_update.role == "admin" and new_role == "member" and board.user_id != current_user:
+        raise HTTPException(status_code=403, detail="Only the board owner can demote an admin to member.")
+
+    # Rule: An admin cannot demote another admin to member
+    if board_member.role == "admin" and member_to_update.role == "admin" and new_role == "member":
+        raise HTTPException(status_code=403, detail="Admins cannot demote other admins to member.")
+
+    # If the new role is 'owner', transfer ownership without changing the previous owner's role
+    if new_role == "owner":
+        board.user_id = user_id  # Transfer ownership to the new user
+        new_role = "admin"  # Set the new owner's role as admin
+
+    # Ensure the new role is either 'admin' or 'member'
+    if new_role not in ["admin", "member"]:
+        raise HTTPException(status_code=400, detail="Invalid role. Role must be 'admin' or 'member'.")
+
+    # Update the role
+    member_to_update.role = new_role
+    db.commit()
+
+    return {"message": "Member role updated successfully."}
 
 @router.delete("/{board_id}/member/{user_id}", status_code=204)
 def delete_board_member(
@@ -51,7 +135,7 @@ def delete_board_member(
         raise HTTPException(status_code=403, detail="Admins cannot remove other admins.")
 
     # Remove the member
-    print(f"Removing member: {user_id} from board: {board_id}")
+    logger.info(f"Removing member: {user_id} from board: {board_id}")
     db.delete(member_to_remove)
     db.commit()
 

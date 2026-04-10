@@ -45,3 +45,27 @@ export const deleteBoardMember = async (token: string, boardId: number, memberId
 
   return response.json();
 };
+
+export const updateMemberRole = async (boardId: number, userId: number, newRole: string, token: string) => {
+  // Ensure the new role is valid before making the request
+  if (!["admin", "member","owner"].includes(newRole)) {
+    throw new Error("Invalid role. Role must be 'admin', 'member', or 'owner'.");
+  }
+
+  const response = await fetch(`${API_URL}/members/${boardId}/member/${userId}/role`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}` // Include the token in the Authorization header
+    },
+    body: JSON.stringify({ new_role: newRole }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error("Erreur du backend :", errorData); // Log the backend error for debugging
+    throw new Error(errorData.detail || "Failed to update member role.");
+  }
+
+  return await response.json();
+};
