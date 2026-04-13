@@ -77,7 +77,7 @@
 
 .auth-submit-button {
   background-color: var(--primary-color);
-  color: #fff;
+  color: white;
   border: none;
   padding: 10px 15px;
   border-radius: 4px;
@@ -102,7 +102,7 @@
 
 .auth-modal-button {
   background-color: var(--primary-color);
-  color: #fff;
+  color: white;
   border: none;
   padding: 10px 15px;
   border-radius: 4px;
@@ -125,7 +125,7 @@
 }
 
 .error-message {
-  color: red;
+  color: var(--error-message-color);
   font-size: 0.9rem;
   margin-top: -10px;
   margin-bottom: 10px;

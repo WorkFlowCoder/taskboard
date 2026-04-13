@@ -65,3 +65,7 @@
 .lists-details li {
   margin-bottom: 5px;
 }
+
+.basic-message {
+  color: var(--black-color);
+}

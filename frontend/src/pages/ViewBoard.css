@@ -21,7 +21,7 @@
 }
 
 .board-page .error-message {
-  color: red;
+  color: var(--error-message-color);
   font-weight: bold;
 }
 
@@ -31,7 +31,7 @@
   display: flex;
   flex-direction: column;
   padding: 20px;
-  background-color: #f4f5f7;
+  background-color: white;
 }
 
 .board-title {
@@ -84,7 +84,7 @@
   display: flex;
   flex-direction: column;
   padding: 20px;
-  background-color: #f4f5f7;
+  background-color: white;
 }
 
 .board-title {
@@ -103,7 +103,7 @@
 
 /* Add new list button styling */
 .add-list-button {
-  background-color: #ebecf0;
+  background-color: rgb(172, 163, 163);
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   padding: 10px;
@@ -174,7 +174,7 @@ html, body {
 }
 
 .popup-content button:first-of-type {
-  background-color: #007bff;
+  background-color: var(--blue-button-color);
   color: #fff;
 }
 

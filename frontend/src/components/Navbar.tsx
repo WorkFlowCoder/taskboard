@@ -51,7 +51,6 @@ const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme }) => {
       </ul>
       <div className="navbar-options">
         <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} /> {/* Commutateur de thème */}
-        <Settings size={24} className="lucide-icon" /> {/* Icône des paramètres */}
         {isAuthenticated ? (
           <div className="auth-info">
             <div className="dropdown" onClick={toggleDropdown}>

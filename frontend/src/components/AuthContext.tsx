@@ -1,5 +1,5 @@
-// Importation de useState depuis React
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { validateToken } from '../services/userService';
 
 // Contexte d'authentification pour gérer l'état de connexion des utilisateurs
 
@@ -20,10 +20,15 @@ export const AuthProvider = ({ children }) => {
     const storedInitials = localStorage.getItem('initials'); // Récupère les initiales du stockage local
 
     if (storedToken) {
-      setIsAuthenticated(true);
-      setAuthToken(storedToken);
-      setInitials(storedInitials);
-      setSrcImg(`https://ui-avatars.com/api/?name=${encodeURIComponent(storedInitials)}&background=6a0dad&color=ffffff`); // Génère l'URL de l'image de profil
+      const valid = isTokenValid();
+      if (!valid) {
+        logout(); // Déconnecter l'utilisateur si le token est invalide
+      } else {
+        setIsAuthenticated(true);
+        setAuthToken(storedToken);
+        setInitials(storedInitials);
+        setSrcImg(`https://ui-avatars.com/api/?name=${encodeURIComponent(storedInitials)}&background=6a0dad&color=ffffff`); // Génère l'URL de l'image de profil
+      }
     }
   }, []); // Exécuté une seule fois au montage du composant
 
@@ -35,6 +40,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('authToken', token); // Stocke le token dans le stockage local
     localStorage.setItem('initials', initials); // Stocke les initiales dans le stockage local
     setSrcImg(`https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=6a0dad&color=ffffff`); // Met à jour l'URL de l'image de profil
+    
+    window.location.reload(); // Rafraîchissement de la page après la connexion
   };
 
   // Fonction pour déconnecter un utilisateur
@@ -45,6 +52,8 @@ export const AuthProvider = ({ children }) => {
     setSrcImg(null);
     localStorage.removeItem('authToken'); // Supprime le token du stockage local
     localStorage.removeItem('initials'); // Supprime les initiales du stockage local
+
+    window.location.reload(); // Rafraîchissement de la page après la déconnexion
   };
 
   // Fonction pour mettre à jour les initiales
@@ -54,6 +63,21 @@ export const AuthProvider = ({ children }) => {
     setSrcImg(`https://ui-avatars.com/api/?name=${encodeURIComponent(newInitials)}&background=6a0dad&color=ffffff`); // Met à jour l'URL de l'image de profil
     localStorage.setItem('initials', newInitials); // Met à jour les initiales dans le stockage local
     localStorage.setItem('authToken', newToken); // Met à jour le token dans le stockage local
+  };
+
+  const isTokenValid = async () => {
+    if (authToken) {
+      const valid = await validateToken(authToken);
+      if (valid) {
+        return true;
+      } else {
+        console.log('Token invalide ou expiré.');
+        return false;
+      }
+    } else {
+      console.log('Aucun token trouvé.');
+      return false;
+    }
   };
 
   return (

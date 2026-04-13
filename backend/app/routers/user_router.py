@@ -128,3 +128,12 @@ def update_account(
         "access_token": token,
         "token_type": "bearer"
     }
+
+@router.post("/auth/validate-token")
+def validate_token(current_user: str = Depends(get_current_user)):
+    try:
+        # Si le token est valide, retourne un message de succès
+        return {"message": "Token valide."}
+    except HTTPException as e:
+        # Si le token est invalide, retourne une erreur
+        raise HTTPException(status_code=401, detail="Token invalide ou expiré.")

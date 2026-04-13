@@ -16,7 +16,7 @@ def get_user_boards(current_user: str = Depends(get_current_user), db: Session =
     boards = db.query(Board).join(BoardMember, Board.board_id == BoardMember.board_id).filter(BoardMember.user_id == current_user).all()
     if not boards:
         raise HTTPException(status_code=404, detail="Aucun board trouvé pour cet utilisateur")
-    return boards
+    return {"user_id": current_user, "boards": boards}
 
 # Route pour récupérer les statistiques de tous les boards de l'utilisateur
 @router.get("/boards/stats")

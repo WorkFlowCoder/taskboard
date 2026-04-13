@@ -115,7 +115,7 @@
 
 body.dark-theme .navbar {
   background-color: #1e1e1e;
-  color: #ffffff;
+  color: white;
 }
 
 .theme-toggle {
@@ -144,7 +144,7 @@ body.dark-theme .navbar {
   position: absolute;
   top: 100%;
   right: 0;
-  background-color: #ffffff;
+  background-color: white;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   overflow: hidden;
@@ -166,7 +166,7 @@ body.dark-theme .navbar {
 
 .dropdown-item:hover {
   background-color: #f3f4f6;
-  color: #6a0dad;
+  color: var(--primary-color);
 }
 
 .chevron {
@@ -192,7 +192,7 @@ body.dark-theme .navbar {
 }
 
 .logout-text:hover {
-  color: #6a0dad;
+  color: var(--primary-color);
 }
 
 /* Style pour le texte "Se connecter" à côté de l'icône */
@@ -211,5 +211,5 @@ body.dark-theme .navbar {
 }
 
 .login-container:hover .login-text {
-  color: #6a0dad;
+  color: var(--primary-color);
 }

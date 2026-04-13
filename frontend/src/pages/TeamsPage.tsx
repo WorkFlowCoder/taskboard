@@ -12,16 +12,6 @@ const TeamsPage: React.FC = () => {
   const [selectedMember, setSelectedMember] = useState<{ board_id: number; user_id: number; first_name: string; last_name: string } | null>(null);
   const [editingRole, setEditingRole] = useState<{ board_id: number; user_id: number; role: string } | null>(null);
 
-  const refreshBoards = async () => {
-    try {
-      const updatedBoards = await fetchUserBoardsWithMembers(authToken);
-      setBoards(updatedBoards);
-    } catch (err: any) {
-      console.error('Error refreshing boards:', err);
-      setError(err.message);
-    }
-  };
-
   useEffect(() => {
     if (isAuthenticated) {
       const fetchBoards = async () => {
@@ -93,8 +83,29 @@ const TeamsPage: React.FC = () => {
         if (!isAuthenticated) throw new Error('Utilisateur non authentifié.');
         await updateMemberRole(editingRole.board_id, editingRole.user_id, editingRole.role, authToken);
 
-        // Refresh boards after updating the role
-        await refreshBoards();
+        // If the role was changed to 'owner', refresh the boards data
+        if (editingRole.role === 'owner') {
+          const updatedBoards = await fetchUserBoardsWithMembers(authToken);
+          setBoards(updatedBoards);
+          setEditingRole(null);
+          return;
+        }
+
+        // Update the role in the local state
+        setBoards((prevBoards) =>
+          prevBoards.map((board) =>
+            board.board_id === editingRole.board_id
+              ? {
+                  ...board,
+                  members: board.members.map((member) =>
+                    member.user_id === editingRole.user_id
+                      ? { ...member, role: editingRole.role }
+                      : member
+                  ),
+              }
+              : board
+          )
+        );
         setEditingRole(null);
       } catch (error) {
         console.error('Erreur lors de la mise à jour du rôle :', error);

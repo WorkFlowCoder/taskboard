@@ -4,13 +4,14 @@ import { fetchAllBoards, deleteBoard, updateBoard } from '../services/boardServi
 import { useNavigate } from 'react-router-dom';
 import CreateBoardModal from '../components/CreateBoardModal'; // Import du nouveau composant CreateBoardModal
 import './BoardsPage.css';
-import { Edit3, Trash2, XCircle, CheckCircle } from 'lucide-react';
+import { Edit3, Trash2, XCircle, CheckCircle, ArrowRight } from 'lucide-react';
 
 // Page BoardsPage pour afficher tous les tableaux de l'utilisateur
 
 const BoardsPage: React.FC = () => {
   const { isAuthenticated, authToken } = useAuth(); // Vérifie l'état d'authentification et récupère le token
   const [boards, setBoards] = useState([]); // État pour stocker les tableaux
+  const [id, setId] = useState(null); // État pour stocker son ID
   const [error, setError] = useState(null); // État pour gérer les erreurs
   const navigate = useNavigate(); // Permet de rediriger l'utilisateur
   const [isModalOpen, setIsModalOpen] = useState(false); // État pour gérer l'ouverture de la modal
@@ -22,7 +23,8 @@ const BoardsPage: React.FC = () => {
       const fetchBoards = async () => {
         try {
           const data = await fetchAllBoards(authToken); // Récupère les tableaux via le service
-          setBoards(data);
+          setBoards(data.boards);
+          setId(data.user_id); // Stocke l'ID de l'utilisateur
         } catch (err: any) {
           console.error('Erreur lors de la récupération des boards:', err);
           setError(err.message); // Gère les erreurs lors de la récupération des données
@@ -106,7 +108,7 @@ const BoardsPage: React.FC = () => {
               <li key={board.board_id} className={editingBoardId === board.board_id ? 'editing' : ''}>
                 <div className="board-item relative">
                   <div>
-                    {editingBoardId === board.board_id ? (
+                    {editingBoardId === board.board_id && id === board.user_id ? (
                       <input
                         type="text"
                         value={editedBoard.title}
@@ -122,7 +124,7 @@ const BoardsPage: React.FC = () => {
                         {board.title || 'Sans titre'}
                       </h3>
                     )}
-                    {editingBoardId === board.board_id ? (
+                    {editingBoardId === board.board_id && id === board.user_id ? (
                       <textarea
                         value={editedBoard.description}
                         onChange={(e) => setEditedBoard((prev) => ({ ...prev, description: e.target.value }))
@@ -140,7 +142,7 @@ const BoardsPage: React.FC = () => {
                     </p>
                   </div>
                   <div className="button-group">
-                    {editingBoardId === board.board_id ? (
+                    {(editingBoardId === board.board_id && id === board.user_id) ? (
                       <>
                         <button
                           onClick={handleCancelEdit}
@@ -157,17 +159,27 @@ const BoardsPage: React.FC = () => {
                       </>
                     ) : (
                       <>
+                        {id === board.user_id && (
+                          <>
+                            <button
+                              onClick={() => handleEditBoard(board)}
+                              className="edit"
+                            >
+                              <Edit3 /> {/* Icône pour modifier */}
+                            </button>
+                            <button
+                              className="delete"
+                              onClick={() => handleDeleteBoard(board.board_id)}
+                            >
+                              <Trash2 /> {/* Icône pour supprimer */}
+                            </button>
+                          </>
+                        )}
                         <button
-                          onClick={() => handleEditBoard(board)}
-                          className="edit"
+                          className="redirect"
+                          onClick={() => handleBoardClick(board.board_id)}
                         >
-                          <Edit3 /> {/* Icône pour modifier */}
-                        </button>
-                        <button
-                          className="delete"
-                          onClick={() => handleDeleteBoard(board.board_id)}
-                        >
-                          <Trash2 /> {/* Icône pour supprimer */}
+                          <ArrowRight /> {/* Icône pour rediriger */}
                         </button>
                       </>
                     )}

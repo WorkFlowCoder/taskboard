@@ -100,3 +100,21 @@ export const updateUserAccount = async (token: string, firstName: string, lastNa
 
     return response.json(); // Retourne les données de la réponse
 };
+
+// Fonction pour valider le token
+export const validateToken = async (token: string) => {
+  try {
+    const response = await fetch(API_BASE_URL + "/auth/validate-token", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.ok; // true si le token est valide, false sinon
+  } catch (error) {
+    console.error('Erreur lors de la validation du token:', error);
+    return false;
+  }
+};

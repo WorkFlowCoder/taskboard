@@ -74,7 +74,7 @@
 }
 
 .create-board-modal {
-  background-color: #fff;
+  background-color: white;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -121,7 +121,7 @@
 }
 
 .error-message {
-  color: red;
+  color: var(--error-message-color);
   font-size: 0.875rem;
   margin-top: 5px;
 }

@@ -109,17 +109,12 @@
 }
 
 .edit-role-button {
-  background-color: #007bff;
   color: white;
+  background-color: var(--orange-button-color);
   border: none;
   padding: 5px 10px;
   cursor: pointer;
   border-radius: 4px;
-}
-
-.edit-role-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
 }
 
 .add-member-button {
@@ -176,7 +171,7 @@
 }
 
 .delete-user-button {
-  background-color: #dc3545;
+  background-color: var(--red-button-color);
   color: white;
   border: none;
   padding: 5px 10px;
@@ -186,7 +181,7 @@
 }
 
 .delete-user-button:hover {
-  background-color: #c82333;
+  background-color: var(--red-button-hover-color);
 }
 
 .modal-overlay {
@@ -213,7 +208,7 @@
 }
 
 .confirm-button {
-  background-color: #dc3545;
+  background-color: var(--green-button-color);
   color: white;
   border: none;
   padding: 10px 15px;
@@ -223,7 +218,7 @@
 }
 
 .cancel-button {
-  background-color: #6c757d;
+  background-color: var(--orange-button-color);
   color: white;
   border: none;
   padding: 10px 15px;
@@ -232,7 +227,7 @@
 }
 
 .cancel-edit-button {
-  background-color: #6c757d;
+  background-color: var(--orange-button-color);
   color: white;
   border: none;
   padding: 5px 10px;
@@ -242,11 +237,11 @@
 }
 
 .cancel-edit-button:hover {
-  background-color: #5a6268;
+  background-color: var(--orange-button-color);
 }
 
 .save-role-button {
-  background-color: #28a745;
+  background-color: var(--green-button-color);
   color: white;
   border: none;
   padding: 5px 10px;
@@ -256,5 +251,5 @@
 }
 
 .save-role-button:hover {
-  background-color: #218838;
+  background-color: var(--green-button-color);
 }

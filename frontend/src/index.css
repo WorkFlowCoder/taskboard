@@ -10,6 +10,28 @@ html, body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  --red-button-color: #ff0000;
+  --green-button-color: #00ff00;
+  --orange-button-color: #ffa500;
+  --blue-button-color: #007bff;
+  --error-message-color: red;
+}
+
+/* Style de la scrollbar */
+::-webkit-scrollbar {
+  width: 10px; /* Largeur de la scrollbar */
+  background-color: var(--white-color); /* Couleur de fond de la scrollbar */
+}
+
+/* Style de la partie déplaçable */
+::-webkit-scrollbar-thumb {
+  background-color: var(--primary-color); /* Couleur de la partie déplaçable */
+  border-radius: 6px; /* Arrondi */
+}
+
+/* Optionnel : Style de la piste */
+::-webkit-scrollbar-track {
+  background-color: var(--white-color); /* Couleur de la piste */
 }
 
 .light {

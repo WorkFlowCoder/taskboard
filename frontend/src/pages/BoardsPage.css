@@ -42,7 +42,7 @@
 }
 
 .error-message {
-  color: red;
+  color: var(--error-message-color);
   font-weight: bold;
 }
 
@@ -106,29 +106,21 @@ p.small {
 }
 
 button.save {
-  background-color: #28a745;
-  color: #fff;
+  background-color: var(--green-button-color);
+  color: white;
   border: none;
   padding: 5px 10px;
   border-radius: 5px;
   cursor: pointer;
 }
 
-button.save:hover {
-  background-color: #218838;
-}
-
 button.cancel {
-  background-color: #ffc107;
+  background-color: var(--orange-button-color);
   color: black;
   border: none;
   padding: 5px 10px;
   border-radius: 5px;
   cursor: pointer;
-}
-
-button.cancel:hover {
-  background-color: #e0a800;
 }
 
 button.edit {
@@ -141,19 +133,23 @@ button.edit {
 }
 
 button.delete {
-  background-color: #dc3545;
+  background-color: var(--red-button-color);
   border: none;
   padding: 5px 10px;
   border-radius: 5px;
   cursor: pointer;
 }
 
-button.delete svg.lucide, button.edit svg.lucide, button.cancel svg.lucide, button.save svg.lucide {
-  color: white;
+button.redirect {
+  background-color: var(--green-button-color);
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-button.delete:hover {
-  background-color: #c82333;
+button.redirect svg.lucide, button.delete svg.lucide, button.edit svg.lucide, button.cancel svg.lucide, button.save svg.lucide {
+  color: white;
 }
 
 /* Style for editing indicator */
@@ -167,7 +163,7 @@ button.delete:hover {
   padding: 5px 10px;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  color: #856404;
+  color: var(--orange-button-color);
   font-weight: bold;
   z-index: 1000; /* Ensure it appears above other elements */
 }
@@ -175,7 +171,7 @@ button.delete:hover {
 /* Style for editable title and description during editing */
 .editable-title,
 .editable-description {
-  color: orange;
+  color: var(--orange-button-color);
   outline: none; /* Remove black border */
   border: none; /* Ensure no border appears */
   background-color: transparent; /* Keep background clean */
@@ -204,7 +200,7 @@ button.delete:hover {
 
 /* Style for the board frame */
 .board-frame {
-  border: 2px solid orange; /* Orange frame */
+  border: 2px solid var(--orange-button-color); /* Orange frame */
   border-radius: 8px; /* Optional: Add rounded corners */
   padding: 10px; /* Optional: Add spacing inside the frame */
 }
