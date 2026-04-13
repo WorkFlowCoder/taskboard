@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
+import { useDroppable } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import Card from './Card';
 import './List.css';
 import { Trash2 } from 'lucide-react';
 import { deleteList } from '../services/listService';
+import SortableCard from './SortableCard';
 
 interface ListProps {
   list: any;
@@ -10,7 +15,17 @@ interface ListProps {
 }
 
 const List: React.FC<ListProps> = ({ list, board }) => {
+
+  const { setNodeRef, isOver } = useDroppable({
+    id: list.list_id,
+  });
+
   const [isDeleted, setIsDeleted] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<any>(null);
+
+  if (isDeleted) {
+    return null;
+  }
 
   const handleDeleteList = async (listId: string) => {
     try {
@@ -20,27 +35,46 @@ const List: React.FC<ListProps> = ({ list, board }) => {
       }
 
       await deleteList(listId, authToken);
-      setIsDeleted(true); // Remove the list from the UI
+      setIsDeleted(true); // Mark the list as deleted
     } catch (error) {
       console.error('Erreur lors de la suppression de la liste:', error);
     }
   };
 
-  if (isDeleted) return null; // Do not render the list if it is deleted
-
   return (
-    <div className="list">
+    <div
+      className={`list ${isOver ? 'droppable-over' : ''} ${isDeleted ? 'hidden' : ''}`}
+      ref={setNodeRef}
+    >
       <div className="list-header">
         <h4 className="list-title">
-            {list.title}
-            <Trash2 className="delete-icon" onClick={() => handleDeleteList(list.list_id)} />
+          {list.title}
+          <Trash2 className="delete-icon" onClick={() => handleDeleteList(list.list_id)} />
         </h4>
       </div>
-      <div className="cards-container">
-        {list.cards?.map((card: any) => (
-          <Card key={card.card_id} card={card} board={board} members={board.members} />
-        ))}
-      </div>
+      <SortableContext
+        items={(list.cards ?? []).map((card: { card_id: string }) => card.card_id)}
+        strategy={verticalListSortingStrategy}
+      >
+        <div className="cards-container">
+          {list.cards?.map((card: { card_id: string; title: string }) => (
+            <SortableCard key={card.card_id} card={card} onClick={() => setSelectedCard(card)} />
+          ))}
+        </div>
+      </SortableContext>
+      {selectedCard && (
+        <>
+          <div className="modal-overlay" onClick={() => setSelectedCard(null)}></div>
+          <div className="card-modal">
+            <Card
+              card={selectedCard}
+              board={board}
+              members={board.members}
+            />
+            <button onClick={() => setSelectedCard(null)}>Fermer</button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

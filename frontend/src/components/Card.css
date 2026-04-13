@@ -1,17 +1,9 @@
 /* Styles for Card component */
-.card {
-  background-color: var(--white-color);
-  border-radius: 8px;
-  padding: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
 .card-header {
   margin-bottom: 10px;
 }
 
-.card-title {
-  font-size: 1rem;
+.card-name {
   color: var(--black-color);
   margin: 5px;
 }
@@ -24,15 +16,26 @@
   margin-bottom: 10px;
 }
 
+.card-description-container{
+  margin-top: 20px !important;
+  margin-bottom: 40px !important;
+  color: var(--black-color);
+}
+
 .card-description {
-  font-size: 0.9rem;
-  color: #666;
+  border: white 1px solid;
+  padding: 10px;
+}
+
+.card-labels-container {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between tags and the add button */
 }
 
 .card-labels {
   display: flex;
   gap: 5px;
-  margin-top: 10px;
 }
 
 .card-label {
@@ -54,4 +57,19 @@
   border-radius: 4px;
   font-size: 0.8rem;
   margin-right: 5px;
+}
+
+/* Styles for the add-tag-circle */
+.add-tag-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background-color: var(--primary-color);
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 50%;
+  cursor: pointer;
 }
