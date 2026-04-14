@@ -24,3 +24,8 @@ class BoardResponse(BaseModel):
 class BoardCreate(BaseModel):
     title: str
     description: str
+
+# Schéma pour la validation des données entrantes
+class CommentCreate(BaseModel):
+    content: str
+    card_id: int

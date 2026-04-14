@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
-from ..models import Board, User, BoardMember
-from ..utils.auth import SECRET_KEY, ALGORITHM, get_current_user
+from ..models import Board, BoardMember
+from ..utils.auth import get_current_user
 from fastapi.logger import logger
-from ..schemas.board import BoardCreate
+from ..schemas.board import BoardCreate, CommentCreate
 from sqlalchemy.sql import func
 from sqlalchemy import text
 
@@ -261,3 +261,35 @@ def update_board(
         logger.error(f"Erreur lors de la mise à jour du board: {e}")
         db.rollback()
         raise HTTPException(status_code=500, detail="Erreur lors de la mise à jour du board")
+
+@router.post("/comments")
+def create_comment(
+    comment_data: CommentCreate, 
+    db: Session = Depends(get_db), 
+    current_user: int = Depends(get_current_user)
+):
+    try:
+        # On insère directement en SQL pur
+        # Le RETURNING * nous permet de récupérer le commentaire créé (ID, dates, etc.)
+        query = text("""
+            INSERT INTO comments (content, card_id, user_id, created_at, modified_at)
+            VALUES (:content, :card_id, :user_id, NOW(), NOW())
+            RETURNING comment_id, content, created_at, modified_at, user_id, card_id
+        """)
+        
+        result = db.execute(query, {
+            "content": comment_data.content,
+            "card_id": comment_data.card_id,
+            "user_id": current_user
+        })
+        
+        db.commit()
+        
+        # On transforme le résultat en dictionnaire pour la réponse JSON
+        new_comment = result.fetchone()
+        return dict(new_comment._mapping)
+
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Erreur SQL : {e}")
+        raise HTTPException(status_code=500, detail="Erreur lors de la création du commentaire")

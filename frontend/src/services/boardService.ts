@@ -131,3 +131,29 @@ export const getBoardStats = async (token: string) => {
     throw error;
   }
 };
+
+export const addComment = async (cardId: number, content: string, authToken: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/comments`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        card_id: cardId, 
+        content: content 
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Erreur lors de la publication du commentaire');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Erreur addComment:", error);
+    throw error;
+  }
+};

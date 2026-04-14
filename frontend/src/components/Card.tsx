@@ -1,5 +1,7 @@
 import React from 'react';
 import Comments from './Comments';
+import { addComment } from '../services/boardService';
+import { useAuth } from '../components/AuthContext'; // Import du contexte d'authentification
 import './Card.css';
 
 interface CardProps {
@@ -9,6 +11,19 @@ interface CardProps {
 }
 
 const Card: React.FC<CardProps> = ({ card, board, members }) => {
+  const { authToken } = useAuth(); // Récupération du token d'authentification
+
+  const handleAddComment = async (content: string) => {
+
+    try {
+      const newComment = await addComment(card.card_id, content, authToken);
+      console.log("Commentaire soumis :", content);
+      return {"send": true, "message": "ok"};
+    } catch (error: any) {
+      return {"send": false, "message": error.message};
+    }
+};
+
   return (
     <div className="card">
       <div className="card-header">
@@ -49,7 +64,11 @@ const Card: React.FC<CardProps> = ({ card, board, members }) => {
       </div>
       <div className="card-footer">
         <h4>Commentaires :</h4>
-        <Comments comments={card.comments} members={members} />
+        <Comments 
+          comments={card.comments}
+          members={members}
+          onAddComment={handleAddComment}
+        />
       </div>
     </div>
   );

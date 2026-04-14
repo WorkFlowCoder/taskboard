@@ -1,9 +1,9 @@
-from fastapi import APIRouter, HTTPException, Depends, Header
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas.list import ListCreate, ListUpdate, ListResponse
-from app.models import List, User, BoardMember
-from app.utils.auth import SECRET_KEY, ALGORITHM, get_current_user
+from app.models import List, BoardMember
+from app.utils.auth import get_current_user
 import logging
 
 router = APIRouter(prefix="/lists", tags=["Lists"])

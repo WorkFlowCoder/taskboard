@@ -1,4 +1,3 @@
-import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..utils.auth import get_current_user
@@ -8,9 +7,6 @@ from ..models.board import Board
 from ..models.user import User
 from ..schemas.member import UpdateRoleRequest  # Import the schema from the new location
 from pydantic import BaseModel, validator
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/members", tags=["Members"])
 
