@@ -119,10 +119,6 @@
   transition: background-color 0.3s;
 }
 
-.add-list-button:hover {
-  background-color: #d9dadc;
-}
-
 /* Allow scrolling on the body */
 html, body {
   height: 100%;

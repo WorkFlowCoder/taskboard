@@ -1,295 +1,193 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import text, func
+from typing import List
 from ..database import get_db
-from ..models import Board, BoardMember
+from ..models import Board, BoardMember, Card, List, Comment
 from ..utils.auth import get_current_user
-from fastapi.logger import logger
 from ..schemas.board import BoardCreate, CommentCreate
-from sqlalchemy.sql import func
-from sqlalchemy import text
 
-router = APIRouter()
+router = APIRouter(tags=["Boards"])
 
-# Route pour récupérer tous les tableaux d'un utilisateur
+# --- HELPERS (FONCTIONS SQL PUR) ---
+
+def fetch_board_members(board_id: int, db: Session):
+    query = text("""
+        SELECT u.user_id, u.first_name, u.last_name, bm.role
+        FROM board_members bm
+        JOIN users u ON bm.user_id = u.user_id
+        WHERE bm.board_id = :board_id
+    """)
+    result = db.execute(query, {"board_id": board_id})
+    return [dict(row._mapping) for row in result]
+
+def fetch_board_tags(board_id: int, db: Session):
+    # Correction : On récupère tous les labels liés au board, pas seulement ceux utilisés sur des cartes
+    query = text("""
+        SELECT label_id, title, color
+        FROM labels
+        WHERE board_id = :board_id
+    """)
+    result = db.execute(query, {"board_id": board_id})
+    return [dict(row._mapping) for row in result]
+
+def fetch_board_lists(board_id: int, db: Session):
+    # La requête complexe avec json_agg pour récupérer l'arborescence complète
+    query = text("""
+        SELECT l.list_id, l.title, l.color, l.position,
+            (
+                SELECT json_agg(card_data)
+                FROM (
+                    SELECT c.card_id, c.title, c.description, c.position,
+                        (SELECT json_agg(cl.label_id) FROM card_labels cl WHERE cl.card_id = c.card_id) AS labels,
+                        (SELECT json_agg(cm.user_id) FROM card_members cm WHERE cm.card_id = c.card_id) AS members,
+                        (
+                            SELECT json_agg(com_data)
+                            FROM (
+                                SELECT com.comment_id, com.content, com.created_at, com.modified_at, com.user_id AS author
+                                FROM comments com
+                                WHERE com.card_id = c.card_id
+                                ORDER BY com.created_at ASC
+                            ) com_data
+                        ) AS comments
+                    FROM cards c
+                    WHERE c.list_id = l.list_id
+                    ORDER BY c.position ASC
+                ) card_data
+            ) AS cards
+        FROM lists l
+        WHERE l.board_id = :board_id
+        ORDER BY l.position ASC
+    """)
+    result = db.execute(query, {"board_id": board_id})
+    return [dict(row._mapping) for row in result]
+
+# --- ROUTES ---
+
 @router.get("/boards")
-def get_user_boards(current_user: str = Depends(get_current_user), db: Session = Depends(get_db)):
-    boards = db.query(Board).join(BoardMember, Board.board_id == BoardMember.board_id).filter(BoardMember.user_id == current_user).all()
+def get_user_boards(current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Utilisation de l'ORM pour plus de clarté
+    boards = db.query(Board).join(BoardMember).filter(BoardMember.user_id == current_user).all()
     if not boards:
-        raise HTTPException(status_code=404, detail="Aucun board trouvé pour cet utilisateur")
+        return [] # Retourner une liste vide au lieu d'une 404 est souvent préférable pour le front-end
     return {"user_id": current_user, "boards": boards}
 
-# Route pour récupérer les statistiques de tous les boards de l'utilisateur
 @router.get("/boards/stats")
-def get_boards_stats(current_user: str = Depends(get_current_user), db: Session = Depends(get_db)):
-    # Récupérer tous les boards où l'utilisateur est membre
-    logger.info(f"Récupération des statistiques pour user_id: {current_user}")
-    boards = db.query(Board).join(BoardMember, Board.board_id == BoardMember.board_id).filter(BoardMember.user_id == current_user).all()
-    logger.info(f"Boards trouvés: {len(boards)} pour user_id: {current_user}")
-    if not boards:
-        raise HTTPException(status_code=404, detail="Aucun board trouvé pour cet utilisateur")
+def get_boards_stats(current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Récupération des boards via l'appartenance
+    user_boards = db.query(Board).join(BoardMember).filter(BoardMember.user_id == current_user).all()
+    
+    if not user_boards:
+        raise HTTPException(status_code=404, detail="Aucun board trouvé")
 
     stats = []
+    for board in user_boards:
+        # Calcul du total des cartes via ORM (plus lisible)
+        total_cards = db.query(Card).join(List).filter(List.board_id == board.board_id).count()
 
-    for board in boards:
-        # Récupérer le nombre total de cartes sur le board
-        total_cards = db.execute(
-            text(
-                """
-                SELECT COUNT(*) AS total_cards
-                FROM cards c
-                JOIN lists l ON c.list_id = l.list_id
-                WHERE l.board_id = :board_id
-                """
-            ),
-            {"board_id": board.board_id}
-        ).scalar()
-
-        # Récupérer le nombre de cartes par liste
-        cards_per_list = db.execute(
-            text(
-                """
-                SELECT l.list_id AS list_id, l.title AS list_title, COUNT(c.card_id) AS card_count
-                FROM lists l
-                LEFT JOIN cards c ON l.list_id = c.list_id
-                WHERE l.board_id = :board_id
-                GROUP BY l.list_id, l.title
-                ORDER BY l.position ASC
-                """
-            ),
-            {"board_id": board.board_id}
-        ).fetchall()
-
-        # Transformer les résultats en dictionnaires
-        cards_per_list_dict = [dict(row._mapping) for row in cards_per_list]
+        # Cartes par liste
+        cards_per_list = db.query(
+            List.list_id, 
+            List.title.label("list_title"), 
+            func.count(Card.card_id).label("card_count")
+        ).outerjoin(Card).filter(List.board_id == board.board_id).group_by(List.list_id).order_by(List.position).all()
 
         stats.append({
             "board_id": board.board_id,
             "board_title": board.title,
             "total_cards": total_cards,
-            "cards_per_list": cards_per_list_dict
+            "cards_per_list": [row._asdict() for row in cards_per_list]
         })
-
     return stats
 
-# Route pour récupérer un board par son ID
-@router.get("/boards/{board_id}")
-def get_board_by_id(board_id: str, current_user: str = Depends(get_current_user), db: Session = Depends(get_db)):
-    board = db.query(Board).join(BoardMember, Board.board_id == BoardMember.board_id).filter(Board.board_id == board_id, BoardMember.user_id == current_user).first()
-    if not board:
-        logger.warning(f"Board not found or does not belong to user_id: {current_user}")
-        raise HTTPException(status_code=404, detail="Board introuvable ou non autorisé")
-    return board
-
-# Fonction pour récupérer les membres d'un board
-def fetch_board_members(board_id: str, db: Session):
-    members = db.execute(
-        text(
-            """
-            SELECT u.user_id AS user_id, u.first_name AS first_name, u.last_name AS last_name, bm.role AS role
-            FROM board_members bm
-            JOIN users u ON bm.user_id = u.user_id
-            WHERE bm.board_id = :board_id
-            """
-        ),
-        {"board_id": board_id}
-    ).fetchall()
-    return [dict(row._mapping) for row in members]
-
-# Fonction pour récupérer les tags d'un board
-def fetch_board_tags(board_id: str, db: Session):
-    tags = db.execute(
-        text(
-            """
-            SELECT lbl.label_id AS label_id, lbl.title AS title, lbl.color AS color
-            FROM labels lbl
-            JOIN card_labels cl ON lbl.label_id = cl.label_id
-            JOIN cards c ON cl.card_id = c.card_id
-            JOIN lists l ON c.list_id = l.list_id
-            WHERE l.board_id = :board_id
-            GROUP BY lbl.label_id, lbl.title, lbl.color
-            """
-        ),
-        {"board_id": board_id}
-    ).fetchall()
-    return [dict(row._mapping) for row in tags]
-
-# Fonction pour récupérer les listes d'un board
-def fetch_board_lists(board_id: str, db: Session):
-    lists = db.execute(
-        text(
-            """
-            SELECT l.list_id AS list_id, l.title AS title, l.color AS color, l.position AS position,
-                (
-                    SELECT json_agg(
-                        json_build_object(
-                            'card_id', c.card_id,
-                            'title', c.title,
-                            'description', c.description,
-                            'position', c.position,
-                            'labels', (
-                                SELECT json_agg(cl.label_id)
-                                FROM card_labels cl
-                                WHERE cl.card_id = c.card_id
-                            ),
-                            'members', (
-                                SELECT json_agg(cm.user_id)
-                                FROM card_members cm
-                                WHERE cm.card_id = c.card_id
-                            ),
-                            'comments', (
-                                SELECT json_agg(
-                                    json_build_object(
-                                        'comment_id', com.comment_id,
-                                        'content', com.content,
-                                        'created_at', com.created_at,
-                                        'modified_at', com.modified_at,
-                                        'author', com.user_id
-                                    )
-                                    ORDER BY com.created_at ASC
-                                )
-                                FROM comments com
-                                WHERE com.card_id = c.card_id
-                            )
-                        )
-                        ORDER BY c.position ASC
-                    )
-                    FROM cards c
-                    WHERE c.list_id = l.list_id
-                ) AS cards
-            FROM lists l
-            WHERE l.board_id = :board_id
-            ORDER BY l.position ASC
-            """
-        ),
-        {"board_id": board_id}
-    ).fetchall()
-    return [dict(row._mapping) for row in lists]
-
-# Route pour récupérer un board avec tous ses détails
 @router.get("/boards/{board_id}/details")
-def get_board_details(board_id: str, current_user: str = Depends(get_current_user), db: Session = Depends(get_db)):
-    board = db.query(Board).filter(Board.board_id == board_id, Board.user_id == current_user).first()
-    if not board:
-        logger.warning(f"Board not found or does not belong to user_id: {current_user}")
-        raise HTTPException(status_code=404, detail="Board introuvable ou non autorisé")
+def get_board_details(board_id: int, current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Vérification des droits d'accès
+    is_member = db.query(BoardMember).filter(BoardMember.board_id == board_id, BoardMember.user_id == current_user).first()
+    if not is_member:
+        raise HTTPException(status_code=403, detail="Accès non autorisé à ce board")
 
-    members_dict = fetch_board_members(board_id, db)
-    tags_dict = fetch_board_tags(board_id, db)
-    lists_dict = fetch_board_lists(board_id, db)
-
+    board = db.query(Board).filter(Board.board_id == board_id).first()
+    
     return {
         "board_id": board.board_id,
         "title": board.title,
         "description": board.description,
         "created_at": board.created_at,
         "modified_at": board.modified_at,
-        "members": members_dict,
-        "tags": tags_dict,
-        "lists": lists_dict
+        "members": fetch_board_members(board_id, db),
+        "tags": fetch_board_tags(board_id, db),
+        "lists": fetch_board_lists(board_id, db)
     }
 
-# Route pour créer un nouveau board
-@router.post("/boards")
-def create_board(
-    board_data: BoardCreate,
-    current_user: str = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    # Création d'un nouvel objet Board
+@router.post("/boards", status_code=status.HTTP_201_CREATED)
+def create_board(board_data: BoardCreate, current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
+    # 1. Création du Board
     new_board = Board(
         title=board_data.title,
         description=board_data.description,
-        user_id=current_user,
+        user_id=current_user
     )
     db.add(new_board)
-    db.commit()
-    db.refresh(new_board)
+    db.flush() # Flush pour récupérer l'ID avant le commit final
 
-    # Ajouter l'utilisateur comme membre du tableau avec le rôle d'administrateur
+    # 2. Création automatique du créateur comme Admin
     admin_member = BoardMember(
         board_id=new_board.board_id,
         user_id=current_user,
         role="admin"
     )
     db.add(admin_member)
+    
+    try:
+        db.commit()
+        db.refresh(new_board)
+        return {"message": "Board créé avec succès", "board": new_board}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.put("/boards/{board_id}")
+def update_board(board_id: int, board_data: BoardCreate, current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
+    # On vérifie si l'utilisateur est admin du board pour autoriser la modif
+    member = db.query(BoardMember).filter(BoardMember.board_id == board_id, BoardMember.user_id == current_user, BoardMember.role == 'admin').first()
+    
+    if not member:
+        raise HTTPException(status_code=403, detail="Seul un administrateur peut modifier le board")
+
+    board = db.query(Board).filter(Board.board_id == board_id).first()
+    board.title = board_data.title
+    board.description = board_data.description
+    # modified_at est géré par 'onupdate' dans le modèle SQLAlchemy automatiquement
+
     db.commit()
+    db.refresh(board)
+    return {"message": "Board mis à jour", "board": board}
 
-    return {"message": "Board créé avec succès", "board": new_board}
-
-# Route pour supprimer un board par son ID
 @router.delete("/boards/{board_id}")
-def delete_board(
-    board_id: str,
-    current_user: str = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
+def delete_board(board_id: int, current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Vérifier que l'utilisateur possède le board (ou est admin)
     board = db.query(Board).filter(Board.board_id == board_id, Board.user_id == current_user).first()
     if not board:
-        raise HTTPException(status_code=404, detail="Board introuvable ou non autorisé")
+        raise HTTPException(status_code=404, detail="Board non trouvé ou permissions insuffisantes")
 
     db.delete(board)
     db.commit()
     return {"message": "Board supprimé avec succès"}
 
-# Route pour mettre à jour un board
-@router.put("/boards/{board_id}")
-def update_board(
-    board_id: str,
-    board_data: BoardCreate,
-    current_user: str = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    logger.info(f"Requête PUT reçue pour board_id: {board_id} par user_id: {current_user}")
-    logger.info(f"Données reçues: {board_data}")
-
-    board = db.query(Board).filter(Board.board_id == board_id, Board.user_id == current_user).first()
-    if not board:
-        logger.error(f"Board introuvable ou non autorisé pour board_id: {board_id}")
-        raise HTTPException(status_code=404, detail="Board introuvable ou non autorisé")
-
-    # Mise à jour des champs
-    board.title = board_data.title
-    board.description = board_data.description
-    board.modified_at = func.now()  # Met à jour la date de modification
-
-    try:
-        db.commit()
-        db.refresh(board)
-        logger.info(f"Board mis à jour avec succès: {board}")
-        return {"message": "Board mis à jour avec succès", "board": board}
-    except Exception as e:
-        logger.error(f"Erreur lors de la mise à jour du board: {e}")
-        db.rollback()
-        raise HTTPException(status_code=500, detail="Erreur lors de la mise à jour du board")
-
 @router.post("/comments")
-def create_comment(
-    comment_data: CommentCreate, 
-    db: Session = Depends(get_db), 
-    current_user: int = Depends(get_current_user)
-):
+def create_comment(comment_data: CommentCreate, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+    # Version ORM plus propre que le SQL pur
+    new_comment = Comment(
+        content=comment_data.content,
+        card_id=comment_data.card_id,
+        user_id=current_user
+    )
+    db.add(new_comment)
     try:
-        # On insère directement en SQL pur
-        # Le RETURNING * nous permet de récupérer le commentaire créé (ID, dates, etc.)
-        query = text("""
-            INSERT INTO comments (content, card_id, user_id, created_at, modified_at)
-            VALUES (:content, :card_id, :user_id, NOW(), NOW())
-            RETURNING comment_id, content, created_at, modified_at, user_id, card_id
-        """)
-        
-        result = db.execute(query, {
-            "content": comment_data.content,
-            "card_id": comment_data.card_id,
-            "user_id": current_user
-        })
-        
         db.commit()
-        
-        # On transforme le résultat en dictionnaire pour la réponse JSON
-        new_comment = result.fetchone()
-        return dict(new_comment._mapping)
-
+        db.refresh(new_comment)
+        return new_comment
     except Exception as e:
         db.rollback()
-        logger.error(f"Erreur SQL : {e}")
         raise HTTPException(status_code=500, detail="Erreur lors de la création du commentaire")

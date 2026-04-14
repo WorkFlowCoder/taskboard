@@ -1,188 +1,157 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from ..utils.auth import get_current_user
+from typing import List as ListType
 from ..database import get_db
-from ..models.board_member import BoardMember
-from ..models.board import Board
-from ..models.user import User
-from ..schemas.member import UpdateRoleRequest  # Import the schema from the new location
-from pydantic import BaseModel, validator
+from ..models import Board, BoardMember, User
+from ..schemas.member import UpdateRoleRequest
+from ..utils.auth import get_current_user
 
 router = APIRouter(prefix="/members", tags=["Members"])
 
-class UpdateRoleRequest(BaseModel):
-    new_role: str
-
-    @validator("new_role")
-    def validate_role(cls, value):
-        if value not in ["admin", "member", "owner"]:
-            raise ValueError("Invalid role. Role must be 'admin', 'member', or 'owner'.")
-        return value
-
-@router.put("/{board_id}/member/{user_id}/role", status_code=200)
+@router.put("/{board_id}/member/{user_id}/role")
 def update_member_role(
     board_id: int,
     user_id: int,
-    request: UpdateRoleRequest,  # Use the Pydantic model for validation
+    request: UpdateRoleRequest,
     db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
+    current_user: int = Depends(get_current_user)
 ):
     """
-    Update the role of a member on a board. Only admins or the board owner can perform this action.
+    Met à jour le rôle d'un membre. 
+    Seul le propriétaire ou un admin peut modifier les rôles.
     """
-    new_role = request.new_role  # Extract the validated role
-    logger.info(f"Request data: board_id={board_id}, user_id={user_id}, new_role={new_role}")
-
-    # Check if the board exists and the current user has the right permissions
+    # 1. Vérifier l'existence du board
     board = db.query(Board).filter(Board.board_id == board_id).first()
     if not board:
-        raise HTTPException(status_code=404, detail="Board not found.")
+        raise HTTPException(status_code=404, detail="Tableau introuvable.")
 
-    board_member = (
-        db.query(BoardMember)
-        .filter(BoardMember.board_id == board_id, BoardMember.user_id == current_user)
-        .first()
-    )
+    # 2. Vérifier les permissions de celui qui fait la requête
+    requester = db.query(BoardMember).filter(
+        BoardMember.board_id == board_id, 
+        BoardMember.user_id == current_user
+    ).first()
 
-    if not board_member:
-        raise HTTPException(status_code=404, detail="Board not found or access denied.")
+    if not requester or requester.role == "member":
+        raise HTTPException(status_code=403, detail="Permissions insuffisantes.")
 
-    # Rule: A member cannot make modifications
-    if board_member.role == "member":
-        raise HTTPException(status_code=403, detail="Members cannot modify roles.")
-
-    # Ensure the user being updated exists
-    member_to_update = (
-        db.query(BoardMember)
-        .filter(BoardMember.board_id == board_id, BoardMember.user_id == user_id)
-        .first()
-    )
+    # 3. Récupérer le membre à modifier
+    member_to_update = db.query(BoardMember).filter(
+        BoardMember.board_id == board_id, 
+        BoardMember.user_id == user_id
+    ).first()
 
     if not member_to_update:
-        raise HTTPException(status_code=404, detail="Member not found.")
+        raise HTTPException(status_code=404, detail="Le membre à modifier n'existe pas dans ce tableau.")
 
-    # Rule: Only the board owner can assign the owner role
-    if new_role == "owner" and board.user_id != current_user:
-        raise HTTPException(status_code=403, detail="Only the board owner can assign the owner role.")
+    # --- LOGIQUE DES RÈGLES ---
+    
+    # Seul le propriétaire (celui défini dans board.user_id) peut nommer un nouveau propriétaire
+    if request.new_role == "owner":
+        if board.user_id != current_user:
+            raise HTTPException(status_code=403, detail="Seul le propriétaire peut transférer la propriété.")
+        
+        # Transfert de propriété : 
+        # L'ancien owner devient admin, le nouveau devient owner (dans la table Board)
+        # Et les deux sont admin dans la table board_members
+        board.user_id = user_id
+        member_to_update.role = "admin"
+        requester.role = "admin" # Assure que l'ancien reste admin
+    
+    else:
+        # Un admin ne peut pas rétrograder un autre admin (seul le propriétaire le peut)
+        if requester.role == "admin" and member_to_update.role == "admin" and board.user_id != current_user:
+             raise HTTPException(status_code=403, detail="Un admin ne peut pas rétrograder un autre admin.")
+        
+        member_to_update.role = request.new_role
 
-    # Rule: Only the board owner can demote an admin to member
-    if member_to_update.role == "admin" and new_role == "member" and board.user_id != current_user:
-        raise HTTPException(status_code=403, detail="Only the board owner can demote an admin to member.")
-
-    # Rule: An admin cannot demote another admin to member
-    if board_member.role == "admin" and member_to_update.role == "admin" and new_role == "member":
-        raise HTTPException(status_code=403, detail="Admins cannot demote other admins to member.")
-
-    # If the new role is 'owner', transfer ownership without changing the previous owner's role
-    if new_role == "owner":
-        board.user_id = user_id  # Transfer ownership to the new user
-        new_role = "admin"  # Set the new owner's role as admin
-
-    # Ensure the new role is either 'admin' or 'member'
-    if new_role not in ["admin", "member"]:
-        raise HTTPException(status_code=400, detail="Invalid role. Role must be 'admin' or 'member'.")
-
-    # Update the role
-    member_to_update.role = new_role
-    db.commit()
-
-    return {"message": "Member role updated successfully."}
+    try:
+        db.commit()
+        return {"message": "Rôle mis à jour avec succès."}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Erreur lors de la mise à jour.")
 
 @router.delete("/{board_id}/member/{user_id}", status_code=204)
 def delete_board_member(
     board_id: int,
     user_id: int,
     db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)
+    current_user: int = Depends(get_current_user)
 ):
     """
-    Delete a member from a board. Only admins or the board owner can perform this action.
+    Supprime un membre du tableau.
     """
-
-    # Check if the board exists and the current user has the right permissions
-    board_member = (
-        db.query(BoardMember)
-        .filter(BoardMember.board_id == board_id, BoardMember.user_id == current_user)
-        .first()
-    )
-
-    if not board_member:
-        raise HTTPException(status_code=404, detail="Board not found or access denied.")
-
-    if board_member.role != "admin":
-        raise HTTPException(status_code=403, detail="You do not have permission to remove members.")
-
-    # Ensure the user being removed is not the board owner
     board = db.query(Board).filter(Board.board_id == board_id).first()
-    if board.user_id == user_id:
-        raise HTTPException(status_code=403, detail="Cannot remove the board owner.")
+    if not board:
+        raise HTTPException(status_code=404, detail="Tableau introuvable.")
 
-    # Prevent admins from removing other admins, except the owner
-    member_to_remove = (
-        db.query(BoardMember)
-        .filter(BoardMember.board_id == board_id, BoardMember.user_id == user_id)
-        .first()
-    )
+    requester = db.query(BoardMember).filter(
+        BoardMember.board_id == board_id, 
+        BoardMember.user_id == current_user
+    ).first()
+
+    # Seuls les admins ou le propriétaire peuvent supprimer
+    if not requester or requester.role == "member":
+        raise HTTPException(status_code=403, detail="Action non autorisée.")
+
+    # On ne peut pas supprimer le propriétaire du tableau
+    if board.user_id == user_id:
+        raise HTTPException(status_code=403, detail="Impossible de supprimer le propriétaire du tableau.")
+
+    member_to_remove = db.query(BoardMember).filter(
+        BoardMember.board_id == board_id, 
+        BoardMember.user_id == user_id
+    ).first()
 
     if not member_to_remove:
-        raise HTTPException(status_code=404, detail="Member not found.")
+        raise HTTPException(status_code=404, detail="Membre introuvable.")
 
-    if member_to_remove.role == "admin" and board_member.user_id != board.user_id:
-        raise HTTPException(status_code=403, detail="Admins cannot remove other admins.")
+    # Un admin ne peut pas supprimer un autre admin (seul le owner peut)
+    if requester.role == "admin" and member_to_remove.role == "admin" and board.user_id != current_user:
+        raise HTTPException(status_code=403, detail="Un administrateur ne peut pas supprimer un autre administrateur.")
 
-    # Remove the member
-    logger.info(f"Removing member: {user_id} from board: {board_id}")
     db.delete(member_to_remove)
     db.commit()
+    return None
 
-    return {"message": "Member removed successfully."}
-
-@router.get("", response_model=list)
-def get_user_boards(
+@router.get("", response_model=ListType[dict])
+def get_user_boards_with_members(
     db: Session = Depends(get_db),
-    current_user: str = Depends(get_current_user)  # Adjusted to receive only user_id
+    current_user: int = Depends(get_current_user)
 ):
     """
-    Retrieve all boards the current user is working on, along with members and their roles.
+    Récupère tous les tableaux de l'utilisateur avec la liste des membres.
     """
-    boards = (
-        db.query(Board)
-        .join(BoardMember, Board.board_id == BoardMember.board_id)
-        .filter(BoardMember.user_id == current_user)  # Updated to use user_id directly
-        .all()
-    )
+    # Récupérer les boards où l'utilisateur est présent
+    boards = db.query(Board).join(BoardMember).filter(BoardMember.user_id == current_user).all()
 
     if not boards:
-        raise HTTPException(status_code=404, detail="No boards found for the user.")
+        return []
 
     result = []
     for board in boards:
-        members = (
-            db.query(BoardMember, User)
-            .join(User, User.user_id == BoardMember.user_id)
-            .filter(BoardMember.board_id == board.board_id)
-            .all()
-        )
+        # Récupérer les membres et leurs infos utilisateur
+        members_data = db.query(BoardMember, User).join(User, User.user_id == BoardMember.user_id).filter(
+            BoardMember.board_id == board.board_id
+        ).all()
 
-        board_info = {
+        # Identifier le rôle de celui qui fait la requête
+        requester_role = next((m.BoardMember.role for m in members_data if m.User.user_id == current_user), "member")
+
+        result.append({
             "board_id": board.board_id,
             "title": board.title,
-            "user_id": board.user_id,
+            "owner_id": board.user_id,
             "requester_user_id": current_user,
-            "requester_role": next(
-                (member.BoardMember.role for member in members if member.User.user_id == current_user),
-                None
-            ),  # Added requester_role
+            "requester_role": requester_role,
             "members": [
                 {
-                    "user_id": member.User.user_id,
-                    "first_name": member.User.first_name,
-                    "last_name": member.User.last_name,
-                    "role": member.BoardMember.role
-                }
-                for member in members
-            ],
-        }
-        result.append(board_info)
+                    "user_id": m.User.user_id,
+                    "first_name": m.User.first_name,
+                    "last_name": m.User.last_name,
+                    "role": m.BoardMember.role
+                } for m in members_data
+            ]
+        })
 
     return result

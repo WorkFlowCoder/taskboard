@@ -1,70 +1,77 @@
 const API_URL = 'http://localhost:8000';
 
 /**
- * Fetch all boards the user is working on, along with members and their roles.
- * @param token - The user's authentication token.
- * @returns A promise resolving to the list of boards with members and roles.
+ * Récupère tous les tableaux sur lesquels l'utilisateur travaille, 
+ * incluant la liste des membres et leurs rôles respectifs.
  */
 export const fetchUserBoardsWithMembers = async (token: string) => {
   const response = await fetch(`${API_URL}/members`, {
     method: 'GET',
     headers: {
-      Authorization: `Bearer ${token}`,
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
+    const errorData = await response.json().catch(() => ({}));
     console.error('Error fetching user boards with members:', errorData);
-    throw new Error(errorData.detail || 'Failed to fetch user boards with members.');
+    throw new Error(errorData.detail || 'Impossible de récupérer les tableaux et membres.');
   }
 
   return response.json();
 };
 
-export const deleteBoardMember = async (token: string, boardId: number, memberId: number) => {
-  const response = await fetch(`${API_URL}/members/${boardId}/member/${memberId}`, {
+/**
+ * Supprime un membre d'un tableau spécifique.
+ * Gère le statut 204 (No Content) renvoyé par le backend.
+ */
+export const deleteBoardMember = async (token: string, boardId: number, userId: number) => {
+  const response = await fetch(`${API_URL}/members/${boardId}/member/${userId}`, {
     method: 'DELETE',
     headers: {
-      Authorization: `Bearer ${token}`,
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
+    const errorData = await response.json().catch(() => ({}));
     console.error('Error deleting board member:', errorData);
-    throw new Error(errorData.detail || 'Failed to delete board member.');
+    throw new Error(errorData.detail || 'Erreur lors de la suppression du membre.');
   }
 
-  // Handle 204 No Content response
+  // Comme le backend renvoie status_code=204, il n'y a pas de corps JSON à parser
   if (response.status === 204) {
-    return null; // No content to parse
+    return { success: true }; 
   }
 
   return response.json();
 };
 
+/**
+ * Met à jour le rôle d'un membre (admin, member, ou transfert d'owner).
+ */
 export const updateMemberRole = async (boardId: number, userId: number, newRole: string, token: string) => {
-  // Ensure the new role is valid before making the request
-  if (!["admin", "member","owner"].includes(newRole)) {
-    throw new Error("Invalid role. Role must be 'admin', 'member', or 'owner'.");
+  // Validation côté client avant l'envoi
+  const validRoles = ["admin", "member", "owner"];
+  if (!validRoles.includes(newRole)) {
+    throw new Error(`Rôle invalide. Les rôles autorisés sont : ${validRoles.join(", ")}`);
   }
 
   const response = await fetch(`${API_URL}/members/${boardId}/member/${userId}/role`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}` // Include the token in the Authorization header
+      "Authorization": `Bearer ${token}`
     },
     body: JSON.stringify({ new_role: newRole }),
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    console.error("Erreur du backend :", errorData); // Log the backend error for debugging
-    throw new Error(errorData.detail || "Failed to update member role.");
+    const errorData = await response.json().catch(() => ({}));
+    console.error("Erreur backend lors du changement de rôle :", errorData);
+    throw new Error(errorData.detail || "Impossible de mettre à jour le rôle du membre.");
   }
 
   return await response.json();

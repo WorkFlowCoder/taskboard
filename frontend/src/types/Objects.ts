@@ -1,7 +1,7 @@
 export interface Board {
   board_id: number;
   title: string;
-  user_id: number;
+  owner_id: number;
   requester_role: string;
   requester_user_id: number;
   members: Member[];

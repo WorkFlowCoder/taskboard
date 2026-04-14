@@ -1,120 +1,123 @@
 // Service pour gérer les requêtes liées aux utilisateurs
-const API_BASE_URL = 'http://localhost:8000'; // URL de base de l'API
+const API_BASE_URL = 'http://localhost:8000/users'; // Ajout du préfixe /users défini dans FastAPI
 
-// Fonction pour enregistrer un nouvel utilisateur
+/**
+ * Enregistre un nouvel utilisateur
+ */
 export const registerUser = async (firstName: string, lastName: string, email: string, password: string) => {
-    const response = await fetch(API_BASE_URL+"/register", {
+    const response = await fetch(`${API_BASE_URL}/register`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ first_name: firstName, last_name: lastName, email, password }), // Données utilisateur
+        body: JSON.stringify({ first_name: firstName, last_name: lastName, email, password }),
     });
 
     if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Une erreur est survenue lors de l\'enregistrement.'); // Gère les erreurs
+        throw new Error(errorData.detail || 'Une erreur est survenue lors de l\'enregistrement.');
     }
 
-    return response.json(); // Retourne les données de la réponse
+    return response.json();
 };
 
-// Fonction pour connecter un utilisateur
+/**
+ * Connecte un utilisateur
+ */
 export const loginUser = async (email: string, password: string) => {
-    const response = await fetch(API_BASE_URL+"/login", {
+    const response = await fetch(`${API_BASE_URL}/login`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }), // Données de connexion
+        body: JSON.stringify({ email, password }),
     });
 
     if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Une erreur est survenue lors de la connexion.'); // Gère les erreurs
+        throw new Error(errorData.detail || 'Email ou mot de passe incorrect.');
     }
 
-    return response.json(); // Retourne les données de la réponse
+    return response.json();
 };
 
-// Fonction pour récupérer le profil de l'utilisateur
+/**
+ * Récupère le profil de l'utilisateur actuel
+ */
 export const getUserProfile = async (token: string) => {
-  try {
-    const response = await fetch(API_BASE_URL+"/profile", {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const response = await fetch(`${API_BASE_URL}/profile`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Impossible de récupérer le profil.');
     }
 
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      return await response.json();
-    } else {
-      const text = await response.text(); // Log the response body for debugging
-      console.error('Unexpected response format:', text);
-      throw new Error('Unexpected response format: Not JSON');
-    }
-  } catch (error) {
-    console.error('Error fetching user profile:', error);
-    throw error;
-  }
+    return response.json();
 };
 
-// Fonction pour supprimer un compte utilisateur
+/**
+ * Supprime le compte de l'utilisateur
+ */
 export const deleteUserAccount = async (token: string) => {
-    const response = await fetch(API_BASE_URL + "/delete-account", {
+    const response = await fetch(`${API_BASE_URL}/delete-account`, {
         method: 'DELETE',
         headers: {
-            Authorization: `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`,
         },
     });
 
     if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Une erreur est survenue lors de la suppression du compte.');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Une erreur est survenue lors de la suppression.');
     }
 
-    return response.json(); // Retourne les données de la réponse
+    // Pour un status 204 No Content, on ne fait pas .json()
+    if (response.status === 204) return { success: true };
+    return response.json();
 };
 
-// Fonction pour mettre à jour un compte utilisateur
+/**
+ * Met à jour les informations du compte
+ */
 export const updateUserAccount = async (token: string, firstName: string, lastName: string, email: string) => {
-    const response = await fetch(API_BASE_URL + "/update-account", {
+    const response = await fetch(`${API_BASE_URL}/update-account`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ first_name: firstName, last_name: lastName, email }),
     });
 
     if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Une erreur est survenue lors de la mise à jour du compte.');
+        throw new Error(errorData.detail || 'Erreur lors de la mise à jour du compte.');
     }
 
-    return response.json(); // Retourne les données de la réponse
+    return response.json();
 };
 
-// Fonction pour valider le token
+/**
+ * Valide si le token est toujours actif
+ */
 export const validateToken = async (token: string) => {
-  try {
-    const response = await fetch(API_BASE_URL + "/auth/validate-token", {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/validate-token`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+        });
 
-    return response.ok; // true si le token est valide, false sinon
-  } catch (error) {
-    console.error('Erreur lors de la validation du token:', error);
-    return false;
-  }
+        return response.ok; 
+    } catch (error) {
+        console.error('Erreur réseau lors de la validation du token:', error);
+        return false;
+    }
 };

@@ -85,10 +85,6 @@
   width: 100%;
 }
 
-.auth-submit-button:hover {
-  background-color: var(--primary-color);
-}
-
 .auth-toggle-button {
   display: block;
   margin: 20px auto 0;
@@ -107,10 +103,6 @@
   padding: 10px 15px;
   border-radius: 4px;
   cursor: pointer;
-}
-
-.auth-modal-button:hover {
-  background-color: var(--primary-color);
 }
 
 .auth-modal-close {

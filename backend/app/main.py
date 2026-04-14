@@ -8,7 +8,7 @@ app = FastAPI()
 origins = [
     "http://localhost",
     "http://localhost:3000",
-    "http://localhost:5173",  # Origine du frontend
+    "http://localhost:5173",
 ]
 
 app.add_middleware(
@@ -19,14 +19,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Inclusion des routes pour les boards
-app.include_router(board_router.router)
-
-# Inclusion des routes pour les utilisateurs
 app.include_router(user_router.router)
-
-# Inclusion des routes pour la liste
+app.include_router(board_router.router)
 app.include_router(list_router.router)
-
-# Inclusion des routes pour les membres
 app.include_router(member_router.router)
+
+@app.get("/")
+def read_root():
+    return {"message": "API is running"}

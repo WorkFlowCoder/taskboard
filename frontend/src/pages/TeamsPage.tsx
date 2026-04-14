@@ -148,14 +148,14 @@ const TeamsPage: React.FC = () => {
                             >
                               <option value="member">Membre</option>
                               <option value="admin">Admin</option>
-                              {board.user_id === board.requester_user_id && <option value="owner">Propriétaire</option>}
+                              {board.owner_id === board.requester_user_id && <option value="owner">Propriétaire</option>}
                             </select>
                           ) : (
-                            <span>{board.user_id === member.user_id ? 'Propriétaire' : member.role}</span>
+                            <span>{board.owner_id === member.user_id ? 'Propriétaire' : member.role}</span>
                           )}
                         </td>
-                        {board.requester_role === 'admin' && board.user_id !== member.user_id && (
-                          (board.user_id === board.requester_user_id || member.role !== 'admin') && (
+                        {board.requester_role === 'admin' && board.owner_id !== member.user_id && (
+                          (board.owner_id === board.requester_user_id || member.role !== 'admin') && (
                             <td className="actions-column">
                               {editingRole && editingRole.user_id === member.user_id && editingRole.board_id === board.board_id ? (
                                 <>

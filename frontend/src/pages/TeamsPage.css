@@ -162,10 +162,6 @@
   background-color: white;
 }
 
-.members-table tr:hover {
-  background-color: #f9f9f9;
-}
-
 .members-table tr:last-child {
   border-bottom: none;
 }
@@ -178,10 +174,6 @@
   cursor: pointer;
   border-radius: 4px;
   margin-left: 5px;
-}
-
-.delete-user-button:hover {
-  background-color: var(--red-button-hover-color);
 }
 
 .modal-overlay {
@@ -236,10 +228,6 @@
   margin-left: 5px;
 }
 
-.cancel-edit-button:hover {
-  background-color: var(--orange-button-color);
-}
-
 .save-role-button {
   background-color: var(--green-button-color);
   color: white;
@@ -248,8 +236,4 @@
   cursor: pointer;
   border-radius: 4px;
   margin-left: 5px;
-}
-
-.save-role-button:hover {
-  background-color: var(--green-button-color);
 }

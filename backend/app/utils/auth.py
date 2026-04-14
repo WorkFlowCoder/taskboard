@@ -1,63 +1,65 @@
-from fastapi import APIRouter, HTTPException, Depends, Header
+from fastapi import HTTPException, Depends, Header
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
-from jose import jwt
-from fastapi import Depends, HTTPException
+from jose import jwt, JWTError
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from ..database import get_db
-from ..models.user import User
-from jose.exceptions import JWTError
+from ..models import User
 
-# Contexte pour le hashage des mots de passe
+# Contexte pour le hashage
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
-SECRET_KEY = "your_secret_key_here"  # Clé secrète pour signer les tokens JWT
-ALGORITHM = "HS256"  # Algorithme utilisé pour les tokens JWT
-ACCESS_TOKEN_EXPIRE_MINUTES = 60*24  # Durée de validité des tokens d'accès
-
-# Fonction pour hasher un mot de passe
-# Utilise le contexte défini pour sécuriser les mots de passe
+SECRET_KEY = "your_secret_key_here" 
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 1440 # 24 heures
 
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
-# Fonction pour vérifier un mot de passe en clair contre un mot de passe hashé
-
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
-# Fonction pour créer un token JWT
-# Ajoute une date d'expiration au token
-
 def create_access_token(data: dict):
     to_encode = data.copy()
-    if "user_id" in data:
-        to_encode["sub"] = str(data["user_id"])  # Assurez-vous que sub contient user_id
+    # On standardise : le 'sub' (subject) du JWT DOIT être l'ID de l'utilisateur en string
+    if "sub" not in to_encode and "user_id" in to_encode:
+        to_encode["sub"] = str(to_encode["user_id"])
+    
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-# OAuth2 scheme for token authentication
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+# OAuth2 scheme
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
-# Function to get the current user from the token
 def get_current_user(authorization: str = Header(...), db: Session = Depends(get_db)):
+    """
+    Récupère l'ID de l'utilisateur à partir du token JWT présent dans le Header.
+    """
     try:
-        scheme, token = authorization.split()
-        if scheme.lower() != "bearer":
-            raise HTTPException(status_code=401, detail="Schéma d'authentification invalide")
+        # 1. Extraction du token
+        parts = authorization.split()
+        if len(parts) != 2 or parts[0].lower() != "bearer":
+            raise HTTPException(status_code=401, detail="En-tête Authorization mal formé")
+        
+        token = parts[1]
+        
+        # 2. Décodage
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_email: str = payload.get("sub")
-        if user_email is None:
-            raise HTTPException(status_code=401, detail="Token invalide")
+        user_id_str: str = payload.get("sub")
+        
+        if user_id_str is None:
+            raise HTTPException(status_code=401, detail="Token invalide : identifiant manquant")
+        
+        user_id = int(user_id_str)
 
-        # Recherche de l'utilisateur dans la base de données
-        user = db.query(User).filter(User.email == user_email).first()
-        if user is None:
+        # 3. Vérification de l'existence (Optionnel mais recommandé pour la sécurité)
+        # On vérifie si l'ID existe vraiment en base
+        user_exists = db.query(User.user_id).filter(User.user_id == user_id).first()
+        if not user_exists:
             raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
 
-        return user.user_id  # Retourne l'identifiant de l'utilisateur
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Token invalide")
-    except ValueError:
-        raise HTTPException(status_code=401, detail="En-tête Authorization mal formé")
+        return user_id # Retourne l'INT pour tes filtres de requêtes SQL
+        
+    except (JWTError, ValueError):
+        raise HTTPException(status_code=401, detail="Token invalide ou expiré")

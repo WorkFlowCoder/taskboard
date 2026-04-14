@@ -1,13 +1,12 @@
-# Moved UpdateRoleRequest to a dedicated schemas module for better code organization
-
-# In a new file: backend/app/schemas/member.py
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 class UpdateRoleRequest(BaseModel):
     new_role: str
 
-    @validator("new_role")
+    @field_validator("new_role")
+    @classmethod
     def validate_role(cls, value):
-        if value not in ["admin", "member", "owner"]:
-            raise ValueError("Invalid role. Role must be 'admin', 'member', or 'owner'.")
+        allowed = ["admin", "member", "owner"]
+        if value not in allowed:
+            raise ValueError(f"Invalid role. Must be one of {allowed}")
         return value

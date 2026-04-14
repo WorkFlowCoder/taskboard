@@ -44,10 +44,6 @@
   transition: background-color 0.3s;
 }
 
-.card-title:hover {
-  background-color: #f0f0f0;
-}
-
 /* Styles for the card modal */
 .card-modal {
   position: fixed;
