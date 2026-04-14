@@ -24,10 +24,12 @@
   flex-direction: column;
   gap: 10px;
   overflow-y: auto;
+  min-height: 50px;
+  padding-top: 5px;
 }
 
 .delete-icon {
-  float: right;
+  margin-left: auto;;
   cursor: pointer;
 }
 
@@ -83,4 +85,27 @@
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(8px); /* Increase blur intensity */
   z-index: 999;
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+}
+
+.list-title-wrapper {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.list-header .drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
+  cursor: grab;
+  padding: 2px;
+  padding-top: 0px;
+  border-radius: 6px;
 }

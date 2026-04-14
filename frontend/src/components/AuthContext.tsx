@@ -18,15 +18,14 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedToken = localStorage.getItem('authToken'); // Récupère le token du stockage local
     const storedInitials = localStorage.getItem('initials'); // Récupère les initiales du stockage local
-
-    if (storedToken) {
-      const valid = isTokenValid();
+    if (storedToken && storedInitials) {
+      const valid = isTokenValid(storedToken);
       if (!valid) {
         logout(); // Déconnecter l'utilisateur si le token est invalide
       } else {
-        setIsAuthenticated(true);
         setAuthToken(storedToken);
         setInitials(storedInitials);
+        setIsAuthenticated(true);
         setSrcImg(`https://ui-avatars.com/api/?name=${encodeURIComponent(storedInitials)}&background=6a0dad&color=ffffff`); // Génère l'URL de l'image de profil
       }
     }
@@ -65,9 +64,9 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('authToken', newToken); // Met à jour le token dans le stockage local
   };
 
-  const isTokenValid = async () => {
-    if (authToken) {
-      const valid = await validateToken(authToken);
+  const isTokenValid = async (token: string|null) => {
+    if (token!=null) {
+      const valid = await validateToken(token);
       if (valid) {
         return true;
       } else {

@@ -13,7 +13,7 @@ from jose.exceptions import JWTError
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 SECRET_KEY = "your_secret_key_here"  # Clé secrète pour signer les tokens JWT
 ALGORITHM = "HS256"  # Algorithme utilisé pour les tokens JWT
-ACCESS_TOKEN_EXPIRE_MINUTES = 30  # Durée de validité des tokens d'accès
+ACCESS_TOKEN_EXPIRE_MINUTES = 60*24  # Durée de validité des tokens d'accès
 
 # Fonction pour hasher un mot de passe
 # Utilise le contexte défini pour sécuriser les mots de passe

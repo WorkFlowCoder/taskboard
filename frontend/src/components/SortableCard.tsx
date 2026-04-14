@@ -8,7 +8,13 @@ interface SortableCardProps {
 }
 
 const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: card.card_id });
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable(
+    { id: card.card_id,
+      data: {
+        type: 'card', // permet de distinguer CARD vs LIST dans le drag
+      },
+     }
+  );
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -30,7 +36,7 @@ const SortableCard: React.FC<SortableCardProps> = ({ card, onClick }) => {
         onClick={(e) => e.stopPropagation()}
         style={{ display: 'inline-block', cursor: 'grab', float: 'right', padding: '1px' }}
       >
-        ::
+        ☰
       </span>
       {card.title}
     </div>

@@ -6,8 +6,10 @@ import { fetchBoardById } from '../services/boardService';
 import { createList } from '../services/listService';
 import List from '../components/List';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove } from '@dnd-kit/sortable';
+import { arrayMove, useSortable, SortableContext, horizontalListSortingStrategy, rectSortingStrategy  } from '@dnd-kit/sortable';
 import { DragOverlay } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
+import { pointerWithin , closestCorners} from '@dnd-kit/core';
 
 const ViewBoard: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +19,7 @@ const ViewBoard: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showPopup, setShowPopup] = useState(false);
   const [newList, setNewList] = useState({ title: '', color: '' });
+  const [activeList, setActiveList] = useState<any>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
@@ -47,6 +50,14 @@ const ViewBoard: React.FC = () => {
     fetchBoard();
   }, [id, isAuthenticated, navigate]);
 
+  const customCollisionStrategy = (args) => {
+    const pointerCollisions = pointerWithin(args);
+    if (pointerCollisions.length > 0) {
+      return pointerCollisions;
+    }
+    return closestCorners(args);
+  };
+
   const handleCreateList = async () => {
     try {
       const createdList = await createList({ ...newList, board_id: board.board_id }, authToken);
@@ -67,69 +78,103 @@ const ViewBoard: React.FC = () => {
     );
   };
 
-  const handleDragStart = ({ active }: { active: any }) => {
-    const activeId = active.id;
-    const sourceList = findListByCardId(activeId);
-    if (sourceList) {
-      const card = sourceList.cards.find((card) => card.card_id === activeId);
-      setActiveCard(card);
+  const handleDragStart = ({ active }: any) => {
+    const type = active.data.current?.type; // 🔥 IMPORTANT
+
+    if (type === 'card') {
+      const sourceList = findListByCardId(active.id);
+
+      if (sourceList) {
+        const card = sourceList.cards.find(
+          (c: any) => c.card_id === active.id
+        );
+        setActiveCard(card);
+      }
+    }
+
+    if (type === 'list') {
+      const list = board.lists.find(
+        (l: any) => l.list_id === active.id
+      );
+      setActiveList(list);
     }
   };
 
-  const handleDragEnd = ({ active, over }: { active: any; over: any }) => {
-    setActiveCard(null); // Reset the active card after drag ends
-    if (!over) {
-      console.error('No target detected for drop.');
-      return;
-    }
+  const handleDragEnd = ({ active, over }: any) => {
+    setActiveCard(null);
+    setActiveList(null);
+
+    if (!over) return;
 
     const activeId = active.id;
     const overId = over.id;
 
-    const sourceList = findListByCardId(activeId);
-    const targetList = findListByCardId(overId);
+    const activeType = active.data.current?.type;
+    const overType = over.data.current?.type;
 
-    if (sourceList && targetList) {
-      const sourceCards = [...sourceList.cards];
-      const targetCards = [...targetList.cards];
-
-      const activeIndex = sourceCards.findIndex((card) => card.card_id === activeId);
-      const overIndex = targetCards.findIndex((card) => card.card_id === overId);
-      if (sourceList.list_id === targetList.list_id) {
-        const updatedCards = arrayMove(sourceCards, activeIndex, overIndex);
-        setBoard((prevBoard: any) => {
-          const newBoard = {
-            ...prevBoard,
-            lists: prevBoard.lists.map((list) =>
-              list.list_id === sourceList.list_id
-                ? { ...list, cards: updatedCards }
-                : list
-            )
-          };
-          return newBoard;
-        });
-      } else {
-        const [movedCard] = sourceCards.splice(activeIndex, 1);
-        targetCards.splice(overIndex, 0, movedCard);
-
-        setBoard((prevBoard: any) => {
-          const newBoard = {
-            ...prevBoard,
-            lists: prevBoard.lists.map((list) => {
-              if (list.list_id === sourceList.list_id) {
-                return { ...list, cards: sourceCards };
-              } else if (list.list_id === targetList.list_id) {
-                return { ...list, cards: targetCards };
-              } else {
-                return list;
-              }
-            })
-          };
-          return newBoard;
-        });
+    // --- LOGIQUE POUR LES LISTES ---
+    if (activeType === 'list') {
+      if (activeId !== overId) {
+        const oldIndex = board.lists.findIndex((l: any) => l.list_id === activeId);
+        const newIndex = board.lists.findIndex((l: any) => l.list_id === overId);
+        
+        setBoard((prev: any) => ({
+          ...prev,
+          lists: arrayMove(prev.lists, oldIndex, newIndex),
+        }));
       }
+      return;
+    }
+
+    // --- LOGIQUE POUR LES CARTES ---
+    const sourceList = findListByCardId(activeId);
+    // Si on survole une carte, targetList est la liste qui la contient.
+    // Si on survole le conteneur vide, overId est l'ID de la liste directement.
+    const targetList = overType === 'list' 
+      ? board.lists.find((l: any) => l.list_id === overId)
+      : findListByCardId(overId);
+
+    if (!sourceList || !targetList) return;
+
+    const sourceCards = [...sourceList.cards];
+    const targetCards = [...targetList.cards];
+
+    const activeIndex = sourceCards.findIndex((c: any) => c.card_id === activeId);
+    
+    // CALCUL DE L'INDEX D'INSERTION
+    let insertIndex;
+    if (overType === 'list') {
+      // Si on drop sur la liste elle-même (zone vide ou en-tête)
+      insertIndex = 0; 
     } else {
-      console.error('Source or target list not found.');
+      // Si on drop sur une autre carte
+      insertIndex = targetCards.findIndex((c: any) => c.card_id === overId);
+    }
+
+    // Empêcher les mutations inutiles si c'est la même position
+    if (sourceList.list_id === targetList.list_id && activeIndex === insertIndex) return;
+
+    if (sourceList.list_id === targetList.list_id) {
+      // Réorganiser dans la même liste
+      const updated = arrayMove(sourceCards, activeIndex, insertIndex);
+      setBoard((prev: any) => ({
+        ...prev,
+        lists: prev.lists.map((l: any) =>
+          l.list_id === sourceList.list_id ? { ...l, cards: updated } : l
+        ),
+      }));
+    } else {
+      // Déplacement entre deux listes
+      const [moved] = sourceCards.splice(activeIndex, 1);
+      targetCards.splice(insertIndex, 0, moved);
+      setBoard((prev: any) => ({
+        ...prev,
+        lists: prev.lists.map((l: any) => {
+          if (l.list_id === sourceList.list_id) return { ...l, cards: sourceCards };
+          if (l.list_id === targetList.list_id) return { ...l, cards: targetCards };
+          return l;
+        }),
+      }));
     }
   };
 
@@ -147,12 +192,16 @@ const ViewBoard: React.FC = () => {
         <h3 className="board-title">{board.title || 'Sans titre'}</h3>
         <p className="board-description">{board.description || 'Aucune description'}</p>
       </header>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-
+      <DndContext sensors={sensors} collisionDetection={customCollisionStrategy} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className="kanban-container">
-          {board.lists?.map((list: any) => (
-            <List key={list.list_id} list={list} board={board}/>
-          ))}
+          <SortableContext
+            items={board.lists.map((list: any) => list.list_id)}
+            strategy={rectSortingStrategy}
+          >
+            {board.lists?.map((list: any) => (
+              <List key={list.list_id} list={list} board={board}/>
+            ))}
+          </SortableContext>
           <div className="add-list-button" onClick={() => setShowPopup(true)}>
             + Ajouter une liste
           </div>

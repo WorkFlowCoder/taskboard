@@ -16,16 +16,29 @@ interface ListProps {
 
 const List: React.FC<ListProps> = ({ list, board }) => {
 
-  const { setNodeRef, isOver } = useDroppable({
-    id: list.list_id,
-  });
+  const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+    } = useSortable(
+      { id: list.list_id,
+        data: {
+          type: 'list',
+        },
+       }
+    );
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+    };
 
   const [isDeleted, setIsDeleted] = useState(false);
   const [selectedCard, setSelectedCard] = useState<any>(null);
 
-  if (isDeleted) {
-    return null;
-  }
+  if (isDeleted) return null;
 
   const handleDeleteList = async (listId: string) => {
     try {
@@ -43,14 +56,24 @@ const List: React.FC<ListProps> = ({ list, board }) => {
 
   return (
     <div
-      className={`list ${isOver ? 'droppable-over' : ''} ${isDeleted ? 'hidden' : ''}`}
+      className={`list ${isDeleted ? 'hidden' : ''}`}
       ref={setNodeRef}
+      style={style}
     >
       <div className="list-header">
-        <h4 className="list-title">
-          {list.title}
-          <Trash2 className="delete-icon" onClick={() => handleDeleteList(list.list_id)} />
-        </h4>
+        <div className="list-title-wrapper">
+          <div
+            className="drag-handle"
+            {...listeners}
+            {...attributes}
+          >
+            ☰
+          </div>
+          <h4 className="list-title">
+            {list.title}
+          </h4>
+        </div>
+        <Trash2 className="delete-icon" onClick={() => handleDeleteList(list.list_id)} />
       </div>
       <SortableContext
         items={(list.cards ?? []).map((card: { card_id: string }) => card.card_id)}
