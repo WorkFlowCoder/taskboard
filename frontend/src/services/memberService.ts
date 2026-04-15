@@ -24,7 +24,6 @@ export const fetchUserBoardsWithMembers = async (token: string) => {
 
 /**
  * Supprime un membre d'un tableau spécifique.
- * Gère le statut 204 (No Content) renvoyé par le backend.
  */
 export const deleteBoardMember = async (token: string, boardId: number, userId: number) => {
   const response = await fetch(`${API_URL}/members/${boardId}/member/${userId}`, {
@@ -40,14 +39,36 @@ export const deleteBoardMember = async (token: string, boardId: number, userId: 
     console.error('Error deleting board member:', errorData);
     throw new Error(errorData.detail || 'Erreur lors de la suppression du membre.');
   }
-
-  // Comme le backend renvoie status_code=204, il n'y a pas de corps JSON à parser
   if (response.status === 204) {
     return { success: true }; 
   }
 
   return response.json();
 };
+
+/**
+ * Ajoute un membre dans un tableau spécifique.
+ */
+export const addBoardMember = async (token: string, boardId: number, email: string, role: string) => {
+  const response = await fetch(`${API_URL}/members/${boardId}/member`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, role }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Erreur lors de l\'ajout du membre.');
+  }
+  if(response.status === 204) {
+    return { success: true };
+  }
+  return response.json();
+};
+
 
 /**
  * Met à jour le rôle d'un membre (admin, member, ou transfert d'owner).

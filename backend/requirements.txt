@@ -7,4 +7,5 @@ passlib
 argon2-cffi
 python-jose
 pydantic
+pydantic[email]
 PyJWT

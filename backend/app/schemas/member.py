@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, EmailStr
 
 class UpdateRoleRequest(BaseModel):
     new_role: str
@@ -10,3 +10,13 @@ class UpdateRoleRequest(BaseModel):
         if value not in allowed:
             raise ValueError(f"Invalid role. Must be one of {allowed}")
         return value
+
+class AddMemberRequest(BaseModel):
+    email: EmailStr
+    role: str
+
+class AddedMemberResponse(BaseModel):
+    user_id: int
+    first_name: str
+    last_name: str
+    role: str

@@ -118,7 +118,6 @@
 }
 
 .add-member-button {
-  margin-top: 10px;
   background-color: var(--primary-color);
   color: white;
   border: none;
@@ -236,4 +235,41 @@
   cursor: pointer;
   border-radius: 4px;
   margin-left: 5px;
+}
+
+/* ============================= */
+/* Formulaire d'ajout de membre  */
+/* ============================= */
+.add-member-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Champ email */
+.add-member-input {
+  padding: 10px 12px;
+  min-width: 240px;
+  border: 1px solid var(--primary-color);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: 'Roboto', sans-serif;
+  background-color: white;
+  color: black;
+  outline: none;
+}
+
+/* Sélecteur de rôle */
+.add-member-select {
+  padding: 10px 12px;
+  min-width: 150px;
+  border: 1px solid var(--primary-color);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: 'Roboto', sans-serif;
+  background-color: white;
+  color: black;
+  outline: none;
+  cursor: pointer;
 }

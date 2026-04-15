@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List as ListType
 from ..database import get_db
 from ..models import Board, BoardMember, User
-from ..schemas.member import UpdateRoleRequest
+from ..schemas.member import UpdateRoleRequest, AddMemberRequest, AddedMemberResponse
 from ..utils.auth import get_current_user
 
 router = APIRouter(prefix="/members", tags=["Members"])
@@ -113,6 +113,66 @@ def delete_board_member(
     db.delete(member_to_remove)
     db.commit()
     return None
+
+@router.post("/{board_id}/member/", status_code=201)
+def add_board_member(
+    board_id: int,
+    request: AddMemberRequest,
+    db: Session = Depends(get_db),
+    current_user: int = Depends(get_current_user)
+):
+    """
+    Ajoute un membre au tableau.
+    """
+    # Récupérer le board
+    board = db.query(Board).filter(Board.board_id == board_id).first()
+    if not board:
+        raise HTTPException(status_code=404, detail="Tableau introuvable.")
+
+    requester = db.query(BoardMember).filter(
+        BoardMember.board_id == board_id,
+        BoardMember.user_id == current_user
+    ).first()
+
+    # Seuls les admins ou le propriétaire peuvent ajouter
+    if not requester or requester.role == "member":
+        raise HTTPException(status_code=403, detail="Action non autorisée.")
+
+    new_user = db.query(User).filter(User.email == request.email).first()
+    if not new_user:
+        raise HTTPException(status_code=404, detail="Utilisateur introuvable.")
+
+    # Vérification du rôle
+    if request.role not in ["member", "admin"]:
+        raise HTTPException(status_code=400, detail="Rôle non valide.")
+
+    # Vérifier que l'utilisateur n'est pas déjà membre
+    is_present = db.query(BoardMember).filter(
+        BoardMember.board_id == board_id,
+        BoardMember.user_id == new_user.user_id
+    ).first()
+
+    if is_present:
+        raise HTTPException(status_code=400, detail="Membre déjà présent sur le board.")
+
+    # Ajout du membre
+    new_member = BoardMember(
+        board_id=board_id,
+        user_id=new_user.user_id,
+        role=request.role
+    )
+
+    db.add(new_member)
+    db.commit()
+    db.refresh(new_member)
+
+    return AddedMemberResponse(
+        user_id=new_user.user_id,
+        first_name=new_user.first_name,
+        last_name=new_user.last_name,
+        role=new_member.role
+    )
+
 
 @router.get("", response_model=ListType[dict])
 def get_user_boards_with_members(

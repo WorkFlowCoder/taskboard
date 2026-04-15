@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { deleteBoardMember, updateMemberRole, fetchUserBoardsWithMembers } from '../services/memberService';
+import { deleteBoardMember, updateMemberRole, addBoardMember, fetchUserBoardsWithMembers } from '../services/memberService';
 import './TeamsPage.css';
 import { useAuth } from '../components/AuthContext';
 import type { Board } from '../types/Objects';
@@ -11,6 +11,14 @@ const TeamsPage: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<{ board_id: number; user_id: number; first_name: string; last_name: string } | null>(null);
   const [editingRole, setEditingRole] = useState<{ board_id: number; user_id: number; role: string } | null>(null);
+  const [addMemberError, setAddMemberError] = useState<string | null>(null);
+  const [newMember, setNewMember] = useState<{
+    email: string;
+    role: string;
+  }>({
+    email: '',
+    role: 'member',
+  });
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -117,6 +125,44 @@ const TeamsPage: React.FC = () => {
     handleDeleteClick({ board_id, user_id, first_name, last_name });
   };
 
+  const handleAddMemberSubmit = async (board_id: number) => {
+    try {
+      setAddMemberError(null);
+
+      if (!isAuthenticated) {
+        throw new Error('Utilisateur non authentifié.');
+      }
+
+      if (!newMember.email.trim()) {
+        throw new Error("L'email est requis.");
+      }
+
+      if (!newMember.role.trim()) {
+        throw new Error("Le role est requis.");
+      }
+      const addedMember = await addBoardMember(authToken, board_id, newMember.email, newMember.role);
+      setBoards((prevBoards) =>
+      prevBoards.map((board) =>
+        board.board_id === board_id
+          ? {
+              ...board,
+              members: [...board.members, addedMember],
+            }
+          : board
+      )
+    );
+      setNewMember({ email: '', role: 'member'});
+    } catch (error) {
+      setAddMemberError(
+        error?.message ||
+        error?.response?.data?.detail ||
+        "Une erreur est survenue lors de l'ajout du membre."
+      );
+    } finally {
+      setNewMember({ email: '', role: 'member'});
+    }
+  };
+
   return (
     <div className="teams-page">
       <h1>Équipes</h1>
@@ -197,7 +243,38 @@ const TeamsPage: React.FC = () => {
                   </tbody>
                 </table>
                 {board.requester_role === 'admin' && (
-                  <button className="add-member-button">Ajouter un membre</button>
+                  <>
+                  <div className="add-member-form">
+                    <input type="email" placeholder="Entrez l'email du membre"
+                      value={newMember.email}
+                      onChange={(e) =>
+                        setNewMember((prev) => ({
+                          ...prev,
+                          email: e.target.value,
+                        }))
+                      }
+                      className="add-member-input"/>
+                    <select value={newMember.role} className="add-member-select"
+                      onChange={(e) =>
+                        setNewMember((prev) => ({
+                          ...prev,
+                          role: e.target.value,
+                      }))}>
+                      <option value="member">Membre</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                    <button
+                      className="add-member-button"
+                      onClick={() => handleAddMemberSubmit(board.board_id)}
+                    >
+                      Ajouter le membre
+                    </button>
+                  </div>
+                  {/* AJOUT : Message d'erreur */}
+                  {addMemberError && (
+                    <p className="error-message">{addMemberError}</p>
+                  )}
+                  </>
                 )}
               </div>
             ))}
