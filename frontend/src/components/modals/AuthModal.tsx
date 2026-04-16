@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { useAuth } from './AuthContext';
+import { useAuth } from '../auth/AuthContext';
 import './AuthModal.css';
-import { registerUser, loginUser } from '../services/userService';
+import { registerUser, loginUser } from '../../services/userService';
 
 interface AuthModalProps {
   onClose: () => void;

@@ -1,0 +1,269 @@
+/* =========================
+   NAVBAR
+========================= */
+
+.navbar {
+  width: 100%;
+  box-sizing: border-box;
+
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 0 2rem;
+
+  background-color: var(--white-color);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* =========================
+   LEFT AREA
+========================= */
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.navbar-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--black-color);
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-right: inherit;
+}
+
+.navbar-logo img {
+  width: 40px;
+  height: 40px;
+}
+
+/* =========================
+   LINKS
+========================= */
+
+.navbar-links {
+  display: flex;
+  gap: 1rem;
+
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+.navbar-links li {
+  margin: auto;
+  padding: 0;
+  border: none;
+}
+
+.navbar-links li a {
+  font-size: 1rem;
+  font-weight: 500;
+
+  color: var(--black-color);
+  background-color: var(--white-color);
+
+  text-decoration: none;
+
+  transition: color 0.3s;
+}
+
+.navbar-links .active-link {
+  font-weight: bold;
+
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
+}
+
+/* =========================
+   RIGHT OPTIONS
+========================= */
+
+.navbar-options {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+
+  margin-left: auto;
+}
+
+.navbar-options .lucide-icon {
+  cursor: pointer;
+}
+
+.navbar-options .lucide-icon:hover {
+  opacity: 0.8;
+}
+
+/* =========================
+   AUTH AREA
+========================= */
+
+.auth-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-avatar {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+  object-fit: cover;
+
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.user-avatar:hover {
+  transform: scale(1.1);
+}
+
+.login-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  cursor: pointer;
+}
+
+.login-text {
+  font-size: 1rem;
+  font-weight: bold;
+
+  color: var(--primary-color);
+
+  transition: color 0.3s;
+}
+
+.login-container:hover .login-text {
+  color: var(--primary-color);
+}
+
+/* =========================
+   THEME BUTTON
+========================= */
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0.5rem;
+
+  background: none;
+  border: none;
+
+  cursor: pointer;
+
+  transition: transform 0.3s;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+}
+
+/* =========================
+   DARK MODE
+========================= */
+
+body.dark-theme .navbar {
+  background-color: #1e1e1e;
+  color: white;
+}
+
+/* =========================
+   DROPDOWN
+========================= */
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+
+  display: none;
+
+  min-width: 150px;
+
+  background-color: white;
+
+  border-radius: 8px;
+  overflow: hidden;
+
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  z-index: 1000;
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+.dropdown-item {
+  display: block;
+
+  padding: 0.75rem 1rem;
+
+  color: #333;
+  text-decoration: none;
+
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.dropdown-item:hover {
+  background-color: #f3f4f6;
+  color: var(--primary-color);
+}
+
+.chevron {
+  margin-left: 0.5rem;
+
+  font-size: 0.8rem;
+  color: #333;
+
+  cursor: pointer;
+}
+
+.dropdown-divider {
+  width: 100%;
+  height: 1px;
+
+  margin: 0.5rem 0;
+
+  background-color: #e5e7eb;
+}
+
+.logout-text {
+  color: #333;
+  cursor: pointer;
+
+  transition: color 0.3s;
+}
+
+.logout-text:hover {
+  color: var(--primary-color);
+}

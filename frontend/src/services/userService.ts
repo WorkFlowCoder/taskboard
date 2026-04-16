@@ -44,7 +44,11 @@ export const loginUser = async (email: string, password: string) => {
 /**
  * Récupère le profil de l'utilisateur actuel
  */
-export const getUserProfile = async (token: string) => {
+export const getUserProfile = async (token: string | null) => {
+    if (!token) {
+        throw new Error('Token non fourni.');
+    }
+
     const response = await fetch(`${API_BASE_URL}/profile`, {
         method: 'GET',
         headers: {

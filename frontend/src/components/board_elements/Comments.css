@@ -1,0 +1,146 @@
+/* =========================
+   COMMENTS COMPONENT
+========================= */
+
+.comments {
+  margin-top: 10px;
+}
+
+/* =========================
+   COMMENT ITEM
+========================= */
+
+.comment {
+  position: relative;
+
+  margin-bottom: 10px;
+  padding: 10px;
+
+  background-color: white;
+  border: 1px solid white;
+  border-radius: 8px;
+}
+
+/* =========================
+   COMMENT HEADER
+========================= */
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+
+  margin-bottom: 5px;
+
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.comment-author {
+  font-weight: bold;
+}
+
+.comment-date {
+  font-style: italic;
+}
+
+/* =========================
+   COMMENT CONTENT
+========================= */
+
+p.comment-content {
+  font-size: 0.9rem;
+  color: black;
+}
+
+.card-comment {
+  margin-top: 5px;
+
+  font-size: 0.8rem;
+  color: #444;
+}
+
+/* =========================
+   SEPARATOR
+========================= */
+
+.comment-separator {
+  margin: 20px 0;
+
+  border: 0;
+  border-top: 1px solid #eee;
+}
+
+/* =========================
+   INPUT AREA
+========================= */
+
+.comment-input-container {
+  position: relative;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.comment-textarea {
+  display: block;
+  box-sizing: border-box;
+
+  width: 100%;
+  min-height: 80px;
+
+  margin-top: 10px;
+  padding-right: 50px;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+
+  resize: vertical;
+}
+
+.comment-textarea:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.comment-textarea:disabled {
+  background-color: #f9f9f9;
+  cursor: not-allowed;
+}
+
+/* =========================
+   SUBMIT ICON BUTTON
+========================= */
+
+.comment-submit-icon-button {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 0;
+
+  background-color: white;
+  border: none;
+}
+
+/* =========================
+   LOADING ANIMATION
+========================= */
+
+.icon-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

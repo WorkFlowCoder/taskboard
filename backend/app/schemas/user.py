@@ -21,7 +21,7 @@ class UserUpdate(BaseModel):
 
 # Schéma pour les réponses utilisateur
 class UserResponse(BaseModel):
-    id: int
+    user_id: int
     first_name: str
     last_name: str
     email: str

@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import './ProjectsPage.css';
 import { getBoardStats } from '../services/boardService';
-import { useAuth } from '../components/AuthContext';
+import { useAuth } from '../components/auth/AuthContext';
+import type { BoardStats } from '../types/boardStats';
+
 
 const ProjectsPage: React.FC = () => {
-  const { authToken } = useAuth();
-  const [boards, setBoards] = useState([]);
+  const { authToken, loading } = useAuth();
+  const [boards, setBoards] = useState<BoardStats[]>([]);
 
   useEffect(() => {
+    if (loading) return;
+
     const fetchStats = async () => {
       try {
         if (authToken) {

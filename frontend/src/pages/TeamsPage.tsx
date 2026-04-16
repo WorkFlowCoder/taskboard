@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { deleteBoardMember, updateMemberRole, addBoardMember, fetchUserBoardsWithMembers } from '../services/memberService';
 import './TeamsPage.css';
-import { useAuth } from '../components/AuthContext';
-import type { Board } from '../types/Objects';
+import { useAuth } from '../components/auth/AuthContext';
+import type { Board } from '../types/boardAccess';
 
 const TeamsPage: React.FC = () => {
-  const {authToken, isAuthenticated} = useAuth(); // Use the token from AuthContext
+  const {authToken, isAuthenticated, loading} = useAuth(); // Use the token from AuthContext
   const [boards, setBoards] = useState<Board[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -21,9 +21,12 @@ const TeamsPage: React.FC = () => {
   });
 
   useEffect(() => {
+    if (loading) return;
+
     if (isAuthenticated) {
       const fetchBoards = async () => {
         try {
+          if (!authToken) throw new Error('Utilisateur non authentifié.');
           const data = await fetchUserBoardsWithMembers(authToken);
           setBoards(data);
         } catch (err: any) {
@@ -45,6 +48,7 @@ const TeamsPage: React.FC = () => {
     if (selectedMember) {
       try {
         if (!isAuthenticated) throw new Error('Utilisateur non authentifié.');
+        if (!authToken) throw new Error('Token non valide.');
         await deleteBoardMember(authToken, selectedMember.board_id, selectedMember.user_id);
         // Remove the member from the board in the state
         setBoards((prevBoards) =>
@@ -89,8 +93,8 @@ const TeamsPage: React.FC = () => {
     if (editingRole) {
       try {
         if (!isAuthenticated) throw new Error('Utilisateur non authentifié.');
+        if (!authToken) throw new Error('Token non valide.');
         await updateMemberRole(editingRole.board_id, editingRole.user_id, editingRole.role, authToken);
-
         // If the role was changed to 'owner', refresh the boards data
         if (editingRole.role === 'owner') {
           const updatedBoards = await fetchUserBoardsWithMembers(authToken);
@@ -98,7 +102,6 @@ const TeamsPage: React.FC = () => {
           setEditingRole(null);
           return;
         }
-
         // Update the role in the local state
         setBoards((prevBoards) =>
           prevBoards.map((board) =>
@@ -152,11 +155,10 @@ const TeamsPage: React.FC = () => {
       )
     );
       setNewMember({ email: '', role: 'member'});
-    } catch (error) {
+    } catch (error: unknown) {
+      const err = error as Error;
       setAddMemberError(
-        error?.message ||
-        error?.response?.data?.detail ||
-        "Une erreur est survenue lors de l'ajout du membre."
+        err?.message || "Une erreur est survenue lors de l'ajout du membre."
       );
     } finally {
       setNewMember({ email: '', role: 'member'});

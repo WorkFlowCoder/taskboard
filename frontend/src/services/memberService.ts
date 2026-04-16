@@ -49,7 +49,8 @@ export const deleteBoardMember = async (token: string, boardId: number, userId: 
 /**
  * Ajoute un membre dans un tableau spécifique.
  */
-export const addBoardMember = async (token: string, boardId: number, email: string, role: string) => {
+export const addBoardMember = async (token: string | null, boardId: number, email: string, role: string) => {
+  if (!token) throw new Error('Token non fourni.');
   const response = await fetch(`${API_URL}/members/${boardId}/member`, {
     method: 'POST',
     headers: {

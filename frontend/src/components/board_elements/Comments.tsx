@@ -2,10 +2,15 @@ import React, { useState } from 'react';
 import { SendHorizonal, Loader2 } from 'lucide-react'; // Import des icônes
 import './Comments.css';
 
+interface CommentResponse {
+  send: boolean;
+  message: string;
+}
+
 interface CommentsProps {
   comments: any[];
   members: any[];
-  onAddComment: (content: string) => Promise<void>;
+  onAddComment: (content: string) => Promise<CommentResponse>;
 }
 
 const Comments: React.FC<CommentsProps> = ({ comments, members, onAddComment }) => {
@@ -18,12 +23,11 @@ const Comments: React.FC<CommentsProps> = ({ comments, members, onAddComment }) 
     try {
       setIsSubmitting(true);
       await onAddComment(newComment);
-      setNewComment(''); // Réinitialise le champ après succès
+      setNewComment('');
     } catch (error) {
       console.error("Erreur lors de l'envoi du commentaire:", error);
-      // Optionnel : afficher une erreur à l'utilisateur ici
     } finally {
-      setIsSubmitting(false); // Arrête le chargement, succès ou échec
+      setIsSubmitting(false);
     }
   };
 
@@ -62,14 +66,12 @@ const Comments: React.FC<CommentsProps> = ({ comments, members, onAddComment }) 
           <button 
             type="submit" 
             className="comment-submit-icon-button"
-            disabled={!newComment.trim() || isSubmitting} // Désactivé si vide ou envoi en cours
+            disabled={!newComment.trim() || isSubmitting}
             title="Envoyer le commentaire"
           >
             {isSubmitting ? (
-              // Icône de chargement qui tourne
               <Loader2 className="icon-spin" size={20} />
             ) : (
-              // Icône d'envoi classique
               <SendHorizonal size={20} />
             )}
           </button>

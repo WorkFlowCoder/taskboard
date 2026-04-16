@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './CreateBoardModal.css';
-import { createBoard } from '../services/boardService'; // Import de la fonction createBoard
-import { useAuth } from '../components/AuthContext'; // Import du contexte d'authentification
+import { createBoard } from '../../services/boardService'; // Import de la fonction createBoard
+import { useAuth } from '../auth/AuthContext'; // Import du contexte d'authentification
 import { useNavigate } from 'react-router-dom'; // Import pour redirection ou rafraîchissement
 
 interface CreateBoardModalProps {
@@ -31,6 +31,9 @@ const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose, on
 
     if (Object.keys(newErrors).length === 0) {
       try {
+        if (!authToken) {
+          throw new Error('Utilisateur non authentifié');
+        }
         const newBoard = await createBoard(title, description, authToken); // Appel à la requête de création
         onCreate(newBoard); // Passe le board créé au parent
         onClose();

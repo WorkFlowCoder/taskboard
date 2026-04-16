@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile, deleteUserAccount, updateUserAccount } from '../services/userService';
-import { useAuth } from '../components/AuthContext';
+import { useAuth } from '../components/auth/AuthContext';
 import './ProfilePage.css';
 
 const ProfilePage: React.FC = () => {
-  const { authToken, srcImg, logout, updateProfile } = useAuth() || {}; // Suppression de `isAuthenticated` pour éviter les erreurs.
+  const { isAuthenticated, authToken, srcImg, logout, updateProfile, loading } = useAuth() || {};
   const navigate = useNavigate();
   const [profile, setProfile] = useState<{ first_name: string; last_name: string; email: string; initials: string } | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -13,7 +13,9 @@ const ProfilePage: React.FC = () => {
   const [editedProfile, setEditedProfile] = useState({ first_name: '', last_name: '', email: '' });
 
   useEffect(() => {
-    if (!authToken) {
+    if (loading) return;
+
+    if (!isAuthenticated) {
       navigate('/'); // Redirect to homepage if not authenticated
       return;
     }

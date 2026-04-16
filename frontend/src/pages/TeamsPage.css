@@ -1,3 +1,7 @@
+/* =========================
+   PAGE
+========================= */
+
 .teams-page {
   padding: 20px;
   background-color: var(--light-gray-color);
@@ -8,9 +12,9 @@
 .teams-page h1 {
   font-size: 2.5rem;
   margin-bottom: 20px;
-  color: var(--primary-color);
   text-align: center;
   font-weight: bold;
+  color: var(--primary-color);
 }
 
 .teams-page ul {
@@ -24,6 +28,10 @@
   color: var(--dark-gray-color);
 }
 
+/* =========================
+   BOARDS (CARD VIEW)
+========================= */
+
 .boards-container {
   display: flex;
   flex-wrap: wrap;
@@ -32,15 +40,19 @@
 }
 
 .board-card {
+  width: 300px;
+  padding: 1.5rem;
+
+  text-align: center;
+  color: var(--primary-color);
+
   background-color: var(--white-color);
   border: 1px solid var(--primary-color);
   border-radius: 12px;
-  padding: 1.5rem;
-  width: 300px;
+
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
   transition: transform 0.3s, box-shadow 0.3s;
-  text-align: center;
-  color: var(--primary-color);
 }
 
 .board-card:hover {
@@ -59,6 +71,10 @@
   color: var(--dark-gray-color);
 }
 
+/* =========================
+   TEAMS LIST
+========================= */
+
 .teams-list {
   display: block;
   margin-top: 20px;
@@ -67,13 +83,17 @@
 .team-section {
   margin-bottom: 30px;
   padding: 1rem;
+
+  text-align: center;
+  color: var(--primary-color);
+
+  background-color: white;
   border: 1px solid var(--primary-color);
   border-radius: 8px;
+
   box-shadow: 0 4px 6px var(--primary-color);
-  text-align: center;
+
   transition: transform 0.3s, box-shadow 0.3s;
-  color: var(--primary-color);
-  background-color: white;
 }
 
 .team-section:hover {
@@ -87,10 +107,55 @@
   color: var(--primary-color);
 }
 
-.team-section ul {
-  list-style: none;
-  padding: 0;
+/* =========================
+   TABLE
+========================= */
+
+.members-table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
 }
+
+.members-table th,
+.members-table td {
+  padding: 12px;
+  text-align: left;
+}
+
+.members-table th {
+  background-color: white;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.members-table tr {
+  background-color: white;
+}
+
+/* centré rôle (sans !important proprement) */
+.members-table td.role,
+.members-table th.role {
+  text-align: center;
+}
+
+.members-table td.actions-column {
+  text-align: right;
+  white-space: nowrap;
+  padding-right: 20px;
+}
+
+.members-table th.actions-column {
+  display: none;
+}
+
+.members-table tr:last-child {
+  border-bottom: none;
+}
+
+/* =========================
+   MEMBERS LIST (legacy)
+========================= */
 
 .members-list {
   list-style: none;
@@ -108,138 +173,60 @@
   font-style: italic;
 }
 
-.edit-role-button {
-  color: white;
-  background-color: var(--orange-button-color);
+/* =========================
+   BUTTONS (GROUPED CLEAN)
+========================= */
+
+.edit-role-button,
+.add-member-button,
+.delete-user-button,
+.cancel-button,
+.confirm-button,
+.cancel-edit-button,
+.save-role-button {
   border: none;
-  padding: 5px 10px;
-  cursor: pointer;
   border-radius: 4px;
+  cursor: pointer;
+}
+
+/* individual buttons */
+.edit-role-button {
+  background-color: var(--orange-button-color);
+  color: white;
+  padding: 5px 10px;
 }
 
 .add-member-button {
   background-color: var(--primary-color);
   color: white;
-  border: none;
   padding: 10px 15px;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.members-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-
-.members-table th, .members-table td {
-  padding: 12px;
-  text-align: left;
-}
-
-.members-table th {
-  background-color: white;
-  color: var(--primary-color);
-  font-weight: bold;
-}
-
-.role {
-  text-align: center !important;
-}
-
-.members-table td.actions-column {
-  text-align: right;
-  white-space: nowrap;
-  padding-right: 20px; /* Added extra padding to push buttons further to the right */
-}
-
-.members-table th.actions-column {
-  display: none;
-}
-
-.members-table tr {
-  background-color: white;
-}
-
-.members-table tr:last-child {
-  border-bottom: none;
 }
 
 .delete-user-button {
   background-color: var(--red-button-color);
   color: white;
-  border: none;
   padding: 5px 10px;
-  cursor: pointer;
-  border-radius: 4px;
   margin-left: 5px;
 }
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
-  width: 90%;
-}
-
-.confirm-button {
-  background-color: var(--green-button-color);
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  margin-right: 10px;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.cancel-button {
-  background-color: var(--orange-button-color);
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
+.cancel-button,
 .cancel-edit-button {
   background-color: var(--orange-button-color);
   color: white;
-  border: none;
-  padding: 5px 10px;
-  cursor: pointer;
-  border-radius: 4px;
-  margin-left: 5px;
+  padding: 10px 15px;
 }
 
+.confirm-button,
 .save-role-button {
   background-color: var(--green-button-color);
   color: white;
-  border: none;
-  padding: 5px 10px;
-  cursor: pointer;
-  border-radius: 4px;
-  margin-left: 5px;
+  padding: 10px 15px;
 }
 
-/* ============================= */
-/* Formulaire d'ajout de membre  */
-/* ============================= */
+/* =========================
+   FORM ADD MEMBER
+========================= */
+
 .add-member-form {
   display: flex;
   justify-content: center;
@@ -247,29 +234,67 @@
   gap: 12px;
 }
 
-/* Champ email */
+/* input */
 .add-member-input {
-  padding: 10px 12px;
   min-width: 240px;
+  padding: 10px 12px;
+
   border: 1px solid var(--primary-color);
   border-radius: 6px;
+
   font-size: 0.95rem;
   font-family: 'Roboto', sans-serif;
+
   background-color: white;
   color: black;
+
   outline: none;
 }
 
-/* Sélecteur de rôle */
+/* select */
 .add-member-select {
-  padding: 10px 12px;
   min-width: 150px;
+  padding: 10px 12px;
+
   border: 1px solid var(--primary-color);
   border-radius: 6px;
+
   font-size: 0.95rem;
   font-family: 'Roboto', sans-serif;
+
   background-color: white;
   color: black;
+
   outline: none;
   cursor: pointer;
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+
+  background-color: rgba(0, 0, 0, 0.5);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 1000;
+}
+
+.modal {
+  width: 90%;
+  max-width: 400px;
+
+  padding: 20px;
+  text-align: center;
+
+  background-color: white;
+  border-radius: 8px;
+
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }

@@ -1,14 +1,21 @@
-/* Styles pour une page d'accueil moderne */
+/* =========================
+   PAGE
+========================= */
+
 .homepage {
   text-align: center;
   font-family: Arial, sans-serif;
   color: white;
 }
 
+/* =========================
+   TYPO GENERAL HOME
+========================= */
+
 .homepage h2 {
   font-size: 2rem;
-  color: white;
   margin-bottom: 1rem;
+  color: white;
 }
 
 .homepage p {
@@ -16,9 +23,14 @@
   color: white;
 }
 
+/* =========================
+   HEADER
+========================= */
+
 .homepage-header {
-  text-align: center;
   padding: 2rem;
+  text-align: center;
+
   color: var(--white-color);
   background-color: var(--primary-color);
 }
@@ -35,41 +47,49 @@
   color: white;
 }
 
-.cta-button {
-  background-color: var(--white-color);
-  color: var(--black-color);
-  padding: 0.8rem 1.5rem;
-  border: none;
-  border-radius: 5px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
-}
+/* =========================
+   FEATURES LAYOUT
+========================= */
 
 .features {
   display: flex;
   justify-content: space-around;
-  background-color: var(--white-color);
+
   gap: 2rem;
   padding: 2rem;
+
+  background-color: var(--white-color);
 }
 
+/* =========================
+   FEATURE CARD
+========================= */
+
 .feature {
-  border: 1px solid var(--primary-color);
-  border-radius: 8px;
-  box-shadow: 0 4px 6px var(--primary-color);
-  text-align: center;
-  padding: 1.5rem;
   max-width: 300px;
-  transition: transform 0.3s, box-shadow 0.3s;
+  padding: 1.5rem;
+
+  text-align: center;
+
   color: var(--primary-color);
   background-color: white;
+
+  border: 1px solid var(--primary-color);
+  border-radius: 8px;
+
+  box-shadow: 0 4px 6px var(--primary-color);
+
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .feature:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 10px var(--black-color);
 }
+
+/* =========================
+   FEATURE CONTENT
+========================= */
 
 .feature svg {
   margin-bottom: 1rem;

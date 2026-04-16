@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import Card from './Card';
 import './List.css';
 import { Trash2 } from 'lucide-react';
-import { deleteList } from '../services/listService';
+import { deleteList } from '../../services/listService';
 import SortableCard from './SortableCard';
 
 interface ListProps {
@@ -40,7 +39,7 @@ const List: React.FC<ListProps> = ({ list, board }) => {
 
   if (isDeleted) return null;
 
-  const handleDeleteList = async (listId: string) => {
+  const handleDeleteList = async (listId: number) => {
     try {
       const authToken = localStorage.getItem('authToken'); // Retrieve the auth token from local storage
       if (!authToken) {
@@ -94,7 +93,7 @@ const List: React.FC<ListProps> = ({ list, board }) => {
               board={board}
               members={board.members}
             />
-            <button onClick={() => setSelectedCard(null)}>Fermer</button>
+            <button className="closebutton" onClick={() => setSelectedCard(null)}>Fermer</button>
           </div>
         </>
       )}

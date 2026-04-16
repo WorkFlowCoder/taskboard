@@ -1,7 +1,8 @@
 import React from 'react';
 import Comments from './Comments';
-import { addComment } from '../services/boardService';
-import { useAuth } from '../components/AuthContext'; // Import du contexte d'authentification
+import { addComment } from '../../services/boardService';
+import { useAuth } from '../auth/AuthContext'; // Import du contexte d'authentification
+import TagBox from './TagBox';
 import './Card.css';
 
 interface CardProps {
@@ -12,12 +13,15 @@ interface CardProps {
 
 const Card: React.FC<CardProps> = ({ card, board, members }) => {
   const { authToken } = useAuth(); // Récupération du token d'authentification
+  const [showTagBox, setShowTagBox] = React.useState(false);
 
   const handleAddComment = async (content: string) => {
 
     try {
-      const newComment = await addComment(card.card_id, content, authToken);
-      console.log("Commentaire soumis :", content);
+      if (!authToken) {
+        throw new Error('Utilisateur non authentifié');
+      }
+      await addComment(card.card_id, content, authToken);
       return {"send": true, "message": "ok"};
     } catch (error: any) {
       return {"send": false, "message": error.message};
@@ -43,8 +47,22 @@ const Card: React.FC<CardProps> = ({ card, board, members }) => {
               ) : null;
             })}
           </div>
-          <div className="add-tag-circle" onClick={() => console.log('Add tag clicked')}>+</div>
+          <div className="add-tag-circle" onClick={() => setShowTagBox(true)}>+</div>
         </div>
+        {showTagBox && (
+        <TagBox
+          tags={board.tags}
+          onClose={() => setShowTagBox(false)}
+          onCreateTag={(title) => {
+            console.log("CREATE TAG:", title);
+            // TODO: call API create tag
+          }}
+          onAssignTag={(tagId) => {
+            console.log("ASSIGN TAG:", tagId, "TO CARD", card.card_id);
+            // TODO: call API assign tag
+          }}
+        />
+      )}
       </div>
       <div className="card-body">
         <div className="card-description-container">

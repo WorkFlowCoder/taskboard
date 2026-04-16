@@ -1,7 +1,7 @@
 import './App.css';
-import Navbar from './components/Navbar';
+import Navbar from './components/layout/Navbar';
 import HomePage from './pages/HomePage';
-import Footer from './components/Footer';
+import Footer from './components/layout/Footer';
 import BoardsPage from './pages/BoardsPage';
 import TeamsPage from './pages/TeamsPage';
 import ProjectsPage from './pages/ProjectsPage';
@@ -12,30 +12,22 @@ import { useState, useEffect } from 'react';
 
 const App: React.FC = () => {
   const [isDark, setIsDark] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    return savedTheme === 'dark';
+    return localStorage.getItem('theme') === 'dark';
   });
 
-  const toggleTheme = () => {
-    setIsDark((prev) => !prev);
-  };
-
+  // sync DOM + localStorage
   useEffect(() => {
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
     const root = document.documentElement;
 
-    if (isDark) {
-      root.classList.add('dark');
-      root.classList.remove('light');
-    } else {
-      root.classList.add('light');
-      root.classList.remove('dark');
-    }
+    root.classList.remove('light', 'dark');
+    root.classList.add(isDark ? 'dark' : 'light');
+
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
   }, [isDark]);
 
   return (
     <Router>
-      <Navbar isDark={isDark} toggleTheme={toggleTheme} />
+      <Navbar isDark={isDark}  setIsDark={setIsDark} />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/teams" element={<TeamsPage />} />

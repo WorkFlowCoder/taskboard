@@ -1,0 +1,18 @@
+/* =========================
+   THEME TOGGLE BUTTON
+========================= */
+
+.toggleThemeButton {
+  padding: 5px 0;
+
+  border: none;
+  border-radius: 50%;
+
+  background: transparent;
+  outline: none;
+}
+
+.toggleThemeButton svg.lucide {
+  color: var(--primary-color);
+  cursor: pointer;
+}

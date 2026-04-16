@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
-import { Settings, LogIn, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
+import { LogIn, LayoutDashboard, ChevronDown } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 import './Navbar.css';
 import ThemeToggle from "./ThemeToggle";
-import AuthModal from "./AuthModal";
-import { useAuth } from "./AuthContext";
+import AuthModal from "../modals/AuthModal";
+import { useAuth } from "../auth/AuthContext";
 
 interface NavbarProps {
   isDark: boolean;
-  toggleTheme: () => void;
+  setIsDark: (value: boolean) => void;
 }
 
 // Composant Navbar pour la barre de navigation principale de l'application
 // Permet de naviguer entre les différentes sections et de gérer les options utilisateur
 
-const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme }) => {
-  const { isAuthenticated, logout, initials, srcImg } = useAuth(); // Gestion de l'état d'authentification
+const Navbar: React.FC<NavbarProps> = ({ isDark, setIsDark }) => {
+  const { isAuthenticated, srcImg, logout } = useAuth(); // Gestion de l'état d'authentification
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false); // État pour afficher ou masquer la modal d'authentification
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // État pour gérer l'affichage du menu déroulant
 
@@ -50,7 +50,7 @@ const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme }) => {
         <li><NavLink to="/projects" className={({ isActive }) => isActive ? 'active-link' : ''}>Projets</NavLink></li>
       </ul>
       <div className="navbar-options">
-        <ThemeToggle isDark={isDark} toggleTheme={toggleTheme} /> {/* Commutateur de thème */}
+        <ThemeToggle isDark={isDark} setIsDark={setIsDark} /> {/* Commutateur de thème */}
         {isAuthenticated ? (
           <div className="auth-info">
             <div className="dropdown" onClick={toggleDropdown}>

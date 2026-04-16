@@ -1,11 +1,15 @@
-/* Style pour la page BoardsPage */
+/* =========================
+   PAGE
+========================= */
 
 .boards-page {
-  font-family: Arial, sans-serif;
   padding: 20px;
+  font-family: Arial, sans-serif;
+
   background-color: var(--white-color);
   color: var(--black-color);
-  display: block; /* Remove flexbox */
+
+  display: block;
   align-items: stretch;
 }
 
@@ -23,66 +27,126 @@
   margin-bottom: 5px;
 }
 
-.create-board-button {
-  padding: 10px 15px;
-  font-size: 1rem;
-  color: white;
-  background-color: var(--primary-color);
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
+/* =========================
+   HEADER
+========================= */
 
 .boards-page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+
   margin-bottom: 10px;
 }
 
-.error-message {
-  color: var(--error-message-color);
-  font-weight: bold;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
-}
+/* =========================
+   BOARD LIST / ITEM
+========================= */
 
 .board-item {
-  border: 1px solid var(--primary-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-grow: 1;
+
   margin: 15px;
   padding: 15px;
-  border-radius: 8px;
-  display: flex;
-  flex-grow: 1;
-  justify-content: space-between; /* Sépare le contenu principal et les boutons */
-  align-items: center; /* Aligne verticalement les éléments */
-  box-shadow: 0 4px 6px var(--primary-color);
-  transition: transform 0.3s, box-shadow 0.3s;
+
   background-color: white;
   color: var(--primary-color);
+
+  border: 1px solid var(--primary-color);
+  border-radius: 8px;
+
+  box-shadow: 0 4px 6px var(--primary-color);
+
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.board-item:hover {
+  transform: translateY(-5px);
 }
 
 .board-item div {
   width: 100%;
 }
 
+/* buttons group */
 .board-item .button-group {
   display: flex;
-  gap: 10px; /* Espacement entre les boutons */
-  justify-content: flex-end; /* Aligne les boutons à droite */
+  gap: 10px;
+  justify-content: flex-end;
 }
 
-.boards-page > li {
-  background-color: var(--white-color);
-  border: 1px solid var(--primary-color);
-  border-radius: 8px;
-  margin-bottom: 15px;
-  padding: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+/* =========================
+   BUTTONS
+========================= */
+
+.create-board-button {
+  padding: 10px 15px;
+
+  font-size: 1rem;
+  color: white;
+
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 5px;
+
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button.save,
+button.cancel,
+button.edit,
+button.delete,
+button.redirect {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* individual buttons */
+button.save {
+  background-color: var(--green-button-color);
+  color: white;
+}
+
+button.cancel {
+  background-color: var(--orange-button-color);
+  color: black;
+}
+
+button.edit {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+button.delete {
+  background-color: var(--red-button-color);
+}
+
+button.redirect {
+  background-color: var(--green-button-color);
+}
+
+/* icons */
+button.redirect svg.lucide,
+button.delete svg.lucide,
+button.edit svg.lucide,
+button.cancel svg.lucide,
+button.save svg.lucide {
+  color: white;
+}
+
+/* =========================
+   TEXT / TYPO
+========================= */
+
+.error-message {
+  color: var(--error-message-color);
+  font-weight: bold;
 }
 
 .h3-clickable {
@@ -100,112 +164,94 @@ p.small {
   font-size: 0.9rem;
 }
 
-button.save {
-  background-color: var(--green-button-color);
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button.cancel {
-  background-color: var(--orange-button-color);
-  color: black;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button.edit {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button.delete {
-  background-color: var(--red-button-color);
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button.redirect {
-  background-color: var(--green-button-color);
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button.redirect svg.lucide, button.delete svg.lucide, button.edit svg.lucide, button.cancel svg.lucide, button.save svg.lucide {
-  color: white;
-}
-
-/* Style for editing indicator */
-.editing-indicator {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  display: flex;
-  align-items: center;
-  background-color: #ffeeba; /* Higher contrast */
-  padding: 5px 10px;
-  border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  color: var(--orange-button-color);
-  font-weight: bold;
-  z-index: 1000; /* Ensure it appears above other elements */
-}
-
-/* Style for editable title and description during editing */
-.editable-title,
-.editable-description {
-  color: var(--orange-button-color);
-  outline: none; /* Remove black border */
-  border: none; /* Ensure no border appears */
-  background-color: transparent; /* Keep background clean */
-}
-
-/* Style for the Editable title */
-.editable-title {
-  display: flex;
-  align-items: center;
-  font-size: 1.5rem;
-  margin-bottom: 5px;
-}
-
-/* Style for the Editable description */
-.editable-description {
-  display: flex;
-  align-items: center;
-  font-size: 1rem;
-  margin-bottom: 10px;
-}
-
 .small {
   font-size: 0.875rem;
   color: #6c757d;
 }
 
-/* Style for the board frame */
-.board-frame {
-  border: 2px solid var(--orange-button-color); /* Orange frame */
-  border-radius: 8px; /* Optional: Add rounded corners */
-  padding: 10px; /* Optional: Add spacing inside the frame */
+/* =========================
+   EDIT MODE
+========================= */
+
+.editing-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 5px 10px;
+
+  background-color: #ffeeba;
+  color: var(--orange-button-color);
+
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  font-weight: bold;
+  z-index: 1000;
 }
 
+.editable-title,
+.editable-description {
+  display: flex;
+  align-items: center;
+
+  color: var(--orange-button-color);
+
+  outline: none;
+  border: none;
+  background-color: transparent;
+}
+
+.editable-title {
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+}
+
+.editable-description {
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+/* =========================
+   BOARD FRAME
+========================= */
+
+.board-frame {
+  border: 2px solid var(--orange-button-color);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+/* =========================
+   FORM ELEMENTS
+========================= */
+
 .boards-page textarea {
+  width: 100%;
+
   border: none;
   resize: none;
   outline: none;
+
   background: transparent;
   font-family: inherit;
   font-size: inherit;
-  width: 100%;
+}
+
+/* =========================
+   LEGACY LIST STYLE
+========================= */
+
+.boards-page > li {
+  margin-bottom: 15px;
+  padding: 15px;
+
+  background-color: var(--white-color);
+  border: 1px solid var(--primary-color);
+  border-radius: 8px;
+
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }

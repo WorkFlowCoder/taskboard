@@ -3,7 +3,8 @@ const API_BASE_URL = 'http://localhost:8000';
 /**
  * Récupère les détails complets d'un tableau (listes, cartes, membres, tags)
  */
-export const fetchBoardById = async (id: number, authToken: string) => {
+export const fetchBoardById = async (id: number| undefined, authToken: string) => {
+  if (id === undefined) throw new Error('Id non fourni.');
   try {
     const response = await fetch(`${API_BASE_URL}/boards/${id}/details`, {
       method: 'GET',

@@ -1,19 +1,35 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { validateToken } from '../services/userService';
+import { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
+import { validateToken } from '../../services/userService';
 
-// Contexte d'authentification pour gérer l'état de connexion des utilisateurs
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+interface AuthContextType {
+  isAuthenticated: boolean;
+  authToken: string | null;
+  initials: string | null;
+  srcImg: string;
+  loading: boolean;
+  login: (token: string, initials: string) => void;
+  logout: () => void;
+  updateProfile: (newInitials: string, newToken: string) => void;
+  isTokenValid: (token: string | null) => Promise<boolean>;
+}
 
 // Créer le contexte d'authentification
-const AuthContext = createContext(null);
+const AuthContext = createContext<AuthContextType  | null>(null);
 
 // Fournisseur du contexte d'authentification
 // Permet de partager l'état d'authentification et les fonctions de connexion/déconnexion dans toute l'application
-export const AuthProvider = ({ children }) => {
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Déclaration des états avec useState
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // État pour suivre si l'utilisateur est connecté
-  const [authToken, setAuthToken] = useState(null); // État pour stocker le token d'authentification
-  const [initials, setInitials] = useState(null); // État pour stocker les initiales
-  const [srcImg, setSrcImg] = useState(null); // État pour stocker l'URL de l'image de profil
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false); // État pour suivre si l'utilisateur est connecté
+  const [authToken, setAuthToken] = useState<string | null>(null); // État pour stocker le token d'authentification
+  const [initials, setInitials] = useState<string>(""); // État pour stocker les initiales
+  const [srcImg, setSrcImg] = useState<string>(""); // État pour stocker l'URL de l'image de profil
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedToken = localStorage.getItem('authToken'); // Récupère le token du stockage local
@@ -29,16 +45,17 @@ export const AuthProvider = ({ children }) => {
         setSrcImg(`https://ui-avatars.com/api/?name=${encodeURIComponent(storedInitials)}&background=6a0dad&color=ffffff`); // Génère l'URL de l'image de profil
       }
     }
+    setLoading(false);
   }, []); // Exécuté une seule fois au montage du composant
 
   // Fonction pour connecter un utilisateur
-  const login = (token, initials) => {
+  const login = (token: string | null, initials: string) => {
     setIsAuthenticated(true);
     setAuthToken(token);
     setInitials(initials);
-    localStorage.setItem('authToken', token); // Stocke le token dans le stockage local
-    localStorage.setItem('initials', initials); // Stocke les initiales dans le stockage local
-    setSrcImg(`https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=6a0dad&color=ffffff`); // Met à jour l'URL de l'image de profil
+    localStorage.setItem('authToken', token!); // Stocke le token dans le stockage local
+    localStorage.setItem('initials', initials!); // Stocke les initiales dans le stockage local
+    setSrcImg(`https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=6a0dad&color=ffffff`);
     
     window.location.reload(); // Rafraîchissement de la page après la connexion
   };
@@ -47,8 +64,8 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setIsAuthenticated(false);
     setAuthToken(null);
-    setInitials(null);
-    setSrcImg(null);
+    setInitials("");
+    setSrcImg("");
     localStorage.removeItem('authToken'); // Supprime le token du stockage local
     localStorage.removeItem('initials'); // Supprime les initiales du stockage local
 
@@ -56,35 +73,38 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Fonction pour mettre à jour les initiales
-  const updateProfile = (newInitials, newToken) => {
+  const updateProfile = (newInitials: string, newToken: string) => {
     setInitials(newInitials);
     setAuthToken(newToken);
-    setSrcImg(`https://ui-avatars.com/api/?name=${encodeURIComponent(newInitials)}&background=6a0dad&color=ffffff`); // Met à jour l'URL de l'image de profil
+    setSrcImg(`https://ui-avatars.com/api/?name=${encodeURIComponent(newInitials)}&background=6a0dad&color=ffffff`);
     localStorage.setItem('initials', newInitials); // Met à jour les initiales dans le stockage local
     localStorage.setItem('authToken', newToken); // Met à jour le token dans le stockage local
   };
 
-  const isTokenValid = async (token: string|null) => {
+  const isTokenValid = async (token: string | null): Promise<boolean> => {
     if (token!=null) {
       const valid = await validateToken(token);
       if (valid) {
         return true;
       } else {
-        console.log('Token invalide ou expiré.');
         return false;
       }
     } else {
-      console.log('Aucun token trouvé.');
       return false;
     }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, authToken, initials, srcImg, login, logout, updateProfile }}>
+    <AuthContext.Provider value={{ isAuthenticated, authToken, initials, srcImg, loading, login, logout, updateProfile, isTokenValid }}>
       {children} {/* Fournit le contexte aux composants enfants */}
     </AuthContext.Provider>
   );
 };
 
-// Hook personnalisé pour accéder facilement au contexte d'authentification
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth doit être utilisé à l'intérieur de AuthProvider");
+  }
+  return context;
+};

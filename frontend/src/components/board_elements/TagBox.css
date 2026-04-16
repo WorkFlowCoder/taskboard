@@ -1,0 +1,150 @@
+ /* =========================
+    TAG BOX
+ ========================= */
+
+.tag-box {
+  position: absolute;
+  top: 40px;
+  right: 10px;
+
+  width: 220px;
+
+  padding: 10px;
+
+  background: white;
+  border: 1px solid var(--primary-color);
+  border-radius: 8px;
+
+  z-index: 50;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.tag-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 20px;
+
+  font-weight: bold;
+}
+
+.tag-box-header-button {
+  margin: 0;
+  padding: 0;
+
+  font-size: 18px;
+
+  color: var(--primary-color);
+  background-color: white;
+
+  border: none;
+  cursor: pointer;
+}
+
+/* =========================
+   TAG LIST
+========================= */
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  margin: 10px;
+}
+
+.tag-item {
+  padding: 4px 8px;
+
+  font-size: 12px;
+  color: white;
+
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tag-item.selected {
+  outline: 2px solid var(--black-color);
+}
+
+/* =========================
+   CREATE TAG
+========================= */
+
+.tag-create {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  width: 100%;
+}
+
+.tag-create-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tag-create input,
+.tag-create-row input[type="text"] {
+  flex: 1;
+
+  padding: 4px 6px;
+
+  border: 1px solid var(--primary-color);
+  border-radius: 4px;
+}
+
+/* =========================
+   ACTION BUTTONS
+========================= */
+
+.tag-assign-button {
+  width: 100%;
+  margin-bottom: 0;
+
+  padding: 6px;
+
+  color: white;
+  background: var(--primary-color);
+
+  border: none;
+  cursor: pointer;
+}
+
+.newColorButton {
+  width: 100%;
+  margin: 10px 0 0 0;
+  padding: 5px;
+
+  color: white;
+  background: var(--orange-button-color);
+
+  border: none;
+}
+
+/* =========================
+   COLOR PICKER
+========================= */
+
+.tag-color-picker {
+  width: 28px;
+  height: 28px;
+
+  padding: 0;
+
+  background: transparent;
+
+  border: none;
+  border-radius: 50%;
+
+  cursor: pointer;
+
+  outline: none;
+  box-shadow: none;
+  appearance: none;
+}

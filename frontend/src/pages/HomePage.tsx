@@ -10,7 +10,6 @@ const HomePage: React.FC = () => {
       <header className="homepage-header">
         <h1>Bienvenue sur Trello-Like</h1>
         <p>Votre outil ultime pour gérer vos projets et collaborer avec vos équipes.</p>
-        <button className="cta-button">Commencer Maintenant</button>
       </header>
 
       <section className="features">

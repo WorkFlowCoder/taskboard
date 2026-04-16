@@ -1,23 +1,29 @@
-/* Styles pour la page ViewBoard */
+/* =========================
+   PAGE
+========================= */
+
 .board-page {
   padding: 20px;
   font-family: Arial, sans-serif;
   background-color: var(--white-color);
+
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
 .board-page h1 {
+  margin-bottom: 10px;
+
   font-size: 2rem;
   color: #333;
-  margin-bottom: 10px;
 }
 
 .board-page p {
+  margin: 5px 0;
+
   font-size: 1rem;
   color: var(--black-color);
-  margin: 5px 0;
 }
 
 .board-page .error-message {
@@ -25,25 +31,21 @@
   font-weight: bold;
 }
 
-/* Style de base pour ViewBoard */
+/* =========================
+   BOARD CONTAINER
+========================= */
 
 .board-container {
   display: flex;
   flex-direction: column;
   padding: 20px;
+
   background-color: white;
 }
 
-.board-title {
-  font-size: 2rem;
-  margin: 5px;
-}
-
-.board-description {
-  font-size: 1.2rem;
-  margin-bottom: 20px;
-  color: #6b778c;
-}
+/* =========================
+   BOARD HEADER
+========================= */
 
 .board-header {
   margin-bottom: 10px;
@@ -51,6 +53,8 @@
 }
 
 .board-title {
+  margin: 5px;
+
   font-size: 1.5rem;
   color: #333;
 }
@@ -60,92 +64,119 @@
   color: #666;
 }
 
-/* Kanban container */
-.kanban-container {
-  display: flex;
-  gap: 20px;
-  overflow-x: auto;
-  padding: 10px;
-  flex-grow: 1; /* Take up remaining space above the footer */
-}
-
-/* Footer styling */
-.board-footer {
-  background-color: #ddd;
-  padding: 10px;
-  text-align: center;
-  font-size: 0.9rem;
-  color: #333;
-}
-
-/* Style de base pour ViewBoard */
-
-.board-container {
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  background-color: white;
-}
-
+/* (ancienne variante conservée pour compatibilité visuelle existante) */
 .board-title {
   font-size: 2rem;
   margin-bottom: 10px;
+
   color: var(--primary-color);
 }
 
 .board-description {
   font-size: 1.2rem;
   margin-bottom: 20px;
+
   color: #6b778c;
 }
 
-/* Removed styles for lists, cards, and comments as they are now in their respective component CSS files */
+/* =========================
+   KANBAN
+========================= */
 
-/* Add new list button styling */
-.add-list-button {
-  background-color: rgb(172, 163, 163);
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+.kanban-container {
+  display: flex;
+  gap: 20px;
+
   padding: 10px;
+  overflow-x: auto;
+
+  flex-grow: 1;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.board-footer {
+  padding: 10px;
+
+  font-size: 0.9rem;
+  text-align: center;
+
+  background-color: #ddd;
+  color: #333;
+}
+
+/* =========================
+   ADD LIST BUTTON
+========================= */
+
+.add-list-button {
   min-width: 250px;
-  flex-shrink: 0;
+  padding: 10px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  flex-shrink: 0;
+
   cursor: pointer;
-  color: #333;
+
   font-size: 1rem;
   font-weight: bold;
+  color: #333;
+
+  background-color: rgb(172, 163, 163);
+  border-radius: 8px;
+
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+
   transition: background-color 0.3s;
 }
 
-/* Allow scrolling on the body */
-html, body {
+/* =========================
+   GLOBAL SCROLL
+========================= */
+
+html,
+body {
   height: 100%;
   margin: 0;
-  overflow: auto; /* Enable scrolling */
+
+  overflow: auto;
 }
 
-/* Popup styling */
+/* =========================
+   POPUP
+========================= */
+
 .popup {
   position: fixed;
   top: 0;
   left: 0;
+
   width: 100%;
   height: 100%;
+
   background-color: rgba(0, 0, 0, 0.5);
+
   display: flex;
   justify-content: center;
   align-items: center;
+
   z-index: 1000;
 }
 
 .popup-content {
-  background-color: #fff;
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+
   text-align: center;
+
+  background-color: #fff;
+  border-radius: 8px;
+
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .popup-content h4 {
@@ -155,25 +186,29 @@ html, body {
 .popup-content input {
   display: block;
   width: 100%;
+
   margin-bottom: 10px;
   padding: 8px;
+
   border: 1px solid #ccc;
   border-radius: 4px;
 }
 
-.popup-content button {
+.popup-content-cancel {
   margin: 5px;
   padding: 10px 15px;
+
   border: none;
   border-radius: 4px;
+
   cursor: pointer;
 }
 
-.popup-content button:first-of-type {
+.popup-content-cancel:first-of-type {
   background-color: var(--blue-button-color);
   color: #fff;
 }
 
-.popup-content button:last-of-type {
+.popup-content-cancel:last-of-type {
   background-color: #ccc;
 }
