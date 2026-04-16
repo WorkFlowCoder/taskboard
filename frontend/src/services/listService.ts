@@ -83,3 +83,42 @@ export const updateList = async (
     throw error;
   }
 };
+
+/**
+ * Met à jour la position d'une liste dans un tableau.
+ * Le backend se charge de réorganiser les autres listes.
+ */
+export const updateListPosition = async (
+  listId: number,
+  newPosition: number,
+  authToken: string
+) => {
+  try {
+    const response = await fetch(
+      `${API_URL}/lists/${listId}/position`,
+      {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          new_position: newPosition,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.detail ||
+        'Erreur lors de la mise à jour de la position de la liste'
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Erreur service updateListPosition:", error);
+    throw error;
+  }
+};

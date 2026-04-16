@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from ..database import get_db
-from ..schemas.list import ListCreate, ListUpdate, ListResponse
+from ..schemas.list import ListCreate, ListUpdate, ListResponse, ListReorder
 from ..models import List as ListModel, BoardMember
 from ..utils.auth import get_current_user
 
@@ -105,3 +105,93 @@ def delete_list(
     db.delete(list_to_delete)
     db.commit()
     return {"message": "Liste supprimée avec succès"}
+
+@router.put("/{list_id}/position", response_model=ListResponse)
+def update_list_position(
+    list_id: int,
+    position_data: ListReorder,
+    current_user: int = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Met à jour la position d'une liste et réorganise les autres listes du même board.
+    """
+    new_position = position_data.new_position
+
+    # Démarrer une transaction
+    try:
+        # 1. Récupérer la liste
+        list_to_move = db.query(ListModel).filter(
+            ListModel.list_id == list_id
+        ).with_for_update().first()
+
+        if not list_to_move:
+            raise HTTPException(status_code=404, detail="Liste introuvable.")
+
+        board_id = list_to_move.board_id
+        old_position = list_to_move.position
+
+        # 2. Vérifier les droits de l'utilisateur
+        is_member = db.query(BoardMember).filter(
+            BoardMember.board_id == board_id,
+            BoardMember.user_id == current_user
+        ).first()
+
+        if not is_member:
+            raise HTTPException(status_code=403, detail="Accès refusé.")
+
+        # 3. Récupérer la position maximale
+        max_position = db.query(func.count(ListModel.list_id)).filter(
+            ListModel.board_id == board_id
+        ).scalar()
+
+        if max_position is None or max_position == 0:
+            raise HTTPException(status_code=400, detail="Aucune liste trouvée.")
+
+        # Borner la nouvelle position
+        max_index = max_position - 1
+        new_position = max(0, min(new_position, max_index))
+
+        # Si aucune modification
+        if new_position == old_position:
+            return list_to_move
+
+        # 4. Réorganiser les autres listes
+        if new_position > old_position:
+            # Déplacement vers le haut
+            db.query(ListModel).filter(
+                ListModel.board_id == board_id,
+                ListModel.position <= new_position,
+                ListModel.position > old_position
+            ).update(
+                {ListModel.position: ListModel.position - 1},
+                synchronize_session=False
+            )
+        else:
+            # Déplacement vers le bas
+            db.query(ListModel).filter(
+                ListModel.board_id == board_id,
+                ListModel.position < old_position,
+                ListModel.position >= new_position
+            ).update(
+                {ListModel.position: ListModel.position + 1},
+                synchronize_session=False
+            )
+
+        # 5. Mettre à jour la liste cible
+        list_to_move.position = new_position
+
+        db.commit()
+        db.refresh(list_to_move)
+
+        return list_to_move
+
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erreur lors de la mise à jour de la position : {str(e)}"
+        )

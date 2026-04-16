@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/auth/AuthContext';
 import './ViewBoard.css';
 import { fetchBoardById } from '../services/boardService';
-import { createList } from '../services/listService';
+import { createList, updateListPosition } from '../services/listService';
+import { moveCard } from '../services/cardService';
 import List from '../components/board_elements/List';
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, rectSortingStrategy  } from '@dnd-kit/sortable';
@@ -92,14 +93,51 @@ const ViewBoard: React.FC = () => {
     }
   };
 
-  const handleDragEnd = ({ active, over }: any) => {
+  const syncListPosition = async ( listId: number, newIndex: number, previousLists: any[]) => {
+    try {
+      if (!authToken) {
+        throw new Error("Utilisateur non authentifié.");
+      }
+      await updateListPosition(listId, newIndex, authToken);
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour de la position de la liste :", error);
+      // Rollback en cas d'échec
+      setBoard((prev: any) => ({...prev, lists: previousLists}));
+    }
+  };
+
+  const syncCardPosition = async ( cardId: number, newListId: number, newIndex: number, previousBoard: any) => {
+    try {
+      if (!authToken) {
+        throw new Error("Utilisateur non authentifié.");
+      }
+      await moveCard(cardId, { new_list_id: newListId, new_position: newIndex }, authToken);
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour de la position de la card :",error);
+      // Rollback complet du board
+      setBoard((prev: any) => ({...prev, lists: previousBoard.lists}));
+    }
+  };
+
+  const normalizeListPositions = (lists: any[]) => {
+    return lists.map((list, index) => ({
+      ...list,
+      position: index
+    }));
+  };
+
+  const normalizeCardPositions = (cards: any[]) => {
+    return cards.map((card, index) => ({
+      ...card,
+      position: index
+    }));
+  };
+
+  const handleDragEnd = async ({ active, over }: any) => {
     setActiveCard(null);
-
     if (!over) return;
-
     const activeId = active.id;
     const overId = over.id;
-
     const activeType = active.data.current?.type;
     const overType = over.data.current?.type;
 
@@ -108,11 +146,18 @@ const ViewBoard: React.FC = () => {
       if (activeId !== overId) {
         const oldIndex = board.lists.findIndex((l: any) => l.list_id === activeId);
         const newIndex = board.lists.findIndex((l: any) => l.list_id === overId);
-        
+        const previousLists = [...board.lists];
+        const reordered = arrayMove(previousLists, oldIndex, newIndex);
+        const normalized = normalizeListPositions(reordered);
         setBoard((prev: any) => ({
           ...prev,
-          lists: arrayMove(prev.lists, oldIndex, newIndex),
+          lists: normalized,
         }));
+        const realIndex = normalized.findIndex(
+          (l: any) => l.list_id === activeId
+        );
+        // Synchronisation avec le backend
+        await syncListPosition(activeId, realIndex, previousLists);
       }
       return;
     }
@@ -137,30 +182,49 @@ const ViewBoard: React.FC = () => {
     } else {
       insertIndex = targetCards.findIndex((c: any) => c.card_id === overId);
     }
-    if (sourceList.list_id === targetList.list_id && activeIndex === insertIndex) return;
+
+    const movedCard = sourceCards[activeIndex];
+
+    if (!movedCard) return;
 
     if (sourceList.list_id === targetList.list_id) {
-      // Réorganiser dans la même liste
+      if (activeIndex === insertIndex) return;
+
       const updated = arrayMove(sourceCards, activeIndex, insertIndex);
+      const normalized = normalizeCardPositions(updated);
+      const previousBoard = { ...board };
+
       setBoard((prev: any) => ({
-        ...prev,
-        lists: prev.lists.map((l: any) =>
-          l.list_id === sourceList.list_id ? { ...l, cards: updated } : l
+        ...prev, lists: prev.lists.map((l: any) =>
+          l.list_id === sourceList.list_id ? { ...l, cards: normalized } : l
         ),
       }));
-    } else {
-      // Déplacement entre deux listes
-      const [moved] = sourceCards.splice(activeIndex, 1);
-      targetCards.splice(insertIndex, 0, moved);
-      setBoard((prev: any) => ({
-        ...prev,
-        lists: prev.lists.map((l: any) => {
-          if (l.list_id === sourceList.list_id) return { ...l, cards: sourceCards };
-          if (l.list_id === targetList.list_id) return { ...l, cards: targetCards };
-          return l;
-        }),
-      }));
+      await syncCardPosition(activeId, sourceList.list_id, insertIndex, previousBoard );
+      return;
     }
+    // Cross list move
+    const [moved] = sourceCards.splice(activeIndex, 1);
+    targetCards.splice(insertIndex, 0, moved);
+
+    const normalizedSource = normalizeCardPositions(sourceCards);
+    const normalizedTarget = normalizeCardPositions(targetCards);
+
+    const previousBoard = { ...board };
+
+    setBoard((prev: any) => ({
+      ...prev,
+      lists: prev.lists.map((l: any) => {
+        if (l.list_id === sourceList.list_id) {
+          return { ...l, cards: normalizedSource };
+        }
+        if (l.list_id === targetList.list_id) {
+          return { ...l, cards: normalizedTarget };
+        }
+        return l;
+      }),
+    }));
+
+    await syncCardPosition( activeId, targetList.list_id, insertIndex, previousBoard);
   };
 
   if (error) {
