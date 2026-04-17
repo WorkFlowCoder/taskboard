@@ -2,22 +2,16 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models import Card as CardModel, List as ListModel, BoardMember
+from ..models import Card as CardModel, List as ListModel, BoardMember, Label
 from ..schemas.card import CardMove, CardCreate, CardResponse, CardUpdate
 from ..utils.auth import get_current_user
 
 router = APIRouter(prefix="/cards", tags=["Cards"])
 
 @router.put("/{card_id}/move")
-def move_card(
-    card_id: int,
-    payload: CardMove,
-    current_user: int = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    # 1. Récupérer la card
+def move_card( card_id: int, payload: CardMove, current_user: int = Depends(get_current_user), db: Session = Depends(get_db) ):
+    # Récupérer la card
     card = db.query(CardModel).filter(CardModel.card_id == card_id).first()
-
     if not card:
         raise HTTPException(status_code=404, detail="Card introuvable")
 
@@ -27,11 +21,11 @@ def move_card(
     new_list_id = payload.new_list_id
     new_position = payload.new_position
 
-    # 2. Si rien ne change → exit
+    # Si rien ne change → exit
     if old_list_id == new_list_id and old_position == new_position:
         return card
 
-    # 3. Vérification droits (via board de la list)
+    # Vérification droits (via board de la list)
     old_list = db.query(ListModel).filter(ListModel.list_id == old_list_id).first()
     new_list = db.query(ListModel).filter(ListModel.list_id == new_list_id).first()
 
@@ -42,11 +36,10 @@ def move_card(
         BoardMember.board_id == old_list.board_id,
         BoardMember.user_id == current_user
     ).first()
-
     if not is_member:
         raise HTTPException(status_code=403, detail="Accès refusé")
 
-    # 4. Sécuriser position cible
+    # Sécuriser position cible
     max_position = db.query(CardModel).filter(
         CardModel.list_id == new_list_id
     ).count()
@@ -54,9 +47,7 @@ def move_card(
     new_position = max(0, min(new_position, max_position))
 
     try:
-        # =========================================================
         # CAS 1 : même liste → reorder interne
-        # =========================================================
         if old_list_id == new_list_id:
 
             if new_position > old_position:
@@ -77,12 +68,9 @@ def move_card(
                     {CardModel.position: CardModel.position + 1},
                     synchronize_session=False
                 )
-
-        # =========================================================
         # CAS 2 : changement de liste
-        # =========================================================
         else:
-            # 2.1 retirer de l'ancienne liste
+            # retirer de l'ancienne liste
             db.query(CardModel).filter(
                 CardModel.list_id == old_list_id,
                 CardModel.position > old_position
@@ -91,7 +79,7 @@ def move_card(
                 synchronize_session=False
             )
 
-            # 2.2 décaler la nouvelle liste
+            # décaler la nouvelle liste
             db.query(CardModel).filter(
                 CardModel.list_id == new_list_id,
                 CardModel.position >= new_position
@@ -100,17 +88,13 @@ def move_card(
                 synchronize_session=False
             )
 
-            # 2.3 changer la liste
+            # changer la liste
             card.list_id = new_list_id
-
-        # =========================================================
         # CAS COMMUN : placement final
-        # =========================================================
         card.position = new_position
 
         db.commit()
         db.refresh(card)
-
         return card
 
     except Exception as e:
@@ -121,17 +105,8 @@ def move_card(
         )
 
 @router.post("/", response_model=CardResponse, status_code=201)
-def create_card(
-    payload: CardCreate,
-    current_user: int = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """
-    Crée une nouvelle carte dans une liste.
-    Requiert un utilisateur authentifié via son token.
-    """
-
-    # 1. Vérifier que la liste existe
+def create_card( payload: CardCreate, current_user: int = Depends(get_current_user), db: Session = Depends(get_db) ):
+    # Vérifier que la liste existe
     target_list = db.query(ListModel).filter(
         ListModel.list_id == payload.list_id
     ).first()
@@ -139,7 +114,7 @@ def create_card(
     if not target_list:
         raise HTTPException(status_code=404, detail="Liste introuvable")
 
-    # 2. Vérifier que l'utilisateur est membre du board
+    # Vérifier que l'utilisateur est membre du board
     is_member = db.query(BoardMember).filter(
         BoardMember.board_id == target_list.board_id,
         BoardMember.user_id == current_user
@@ -148,12 +123,12 @@ def create_card(
     if not is_member:
         raise HTTPException(status_code=403, detail="Accès refusé")
 
-    # 3. Calculer la position de la nouvelle carte (fin de liste)
+    # Calculer la position de la nouvelle carte (fin de liste)
     max_position = db.query(CardModel).filter(
         CardModel.list_id == payload.list_id
     ).count()
 
-    # 4. Créer la carte
+    # Créer la carte
     new_card = CardModel(
         title=payload.title,
         description=payload.description,
@@ -243,3 +218,80 @@ def update_card( card_id: int, payload: CardUpdate, current_user: int = Depends(
             status_code=500,
             detail=f"Erreur update card: {str(e)}"
         )
+
+@router.post("/{card_id}/labels/{label_id}")
+def add_label_to_card( card_id: int, label_id: int, current_user: int = Depends(get_current_user), db: Session = Depends(get_db) ):
+    card = db.query(CardModel).filter(CardModel.card_id == card_id).first()
+    if not card:
+        raise HTTPException(status_code=404, detail="Card introuvable")
+
+    label = db.query(Label).filter(Label.label_id == label_id).first()
+    if not label:
+        raise HTTPException(status_code=404, detail="Label introuvable")
+
+    target_list = db.query(ListModel).filter(
+        ListModel.list_id == card.list_id
+    ).first()
+
+    if label.board_id != target_list.board_id:
+        raise HTTPException(status_code=400, detail="Label incompatible avec la card")
+
+    is_member = db.query(BoardMember).filter(
+        BoardMember.board_id == target_list.board_id,
+        BoardMember.user_id == current_user
+    ).first()
+    if not is_member:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+
+    already_exists = any(l.label_id == label_id for l in card.labels)
+
+    if already_exists:
+        raise HTTPException(
+            status_code=409,
+            detail="Label déjà assigné à la card"
+        )
+    card.labels.append(label)
+    db.commit()
+
+    return {
+        "message": "Label ajouté",
+        "card_id": card_id,
+        "label_id": label_id
+    }
+
+@router.delete("/{card_id}/labels/{label_id}")
+def remove_label_from_card( card_id: int, label_id: int, current_user: int = Depends(get_current_user), db: Session = Depends(get_db) ):
+    card = db.query(CardModel).filter(CardModel.card_id == card_id).first()
+    if not card:
+        raise HTTPException(status_code=404, detail="Card introuvable")
+
+    label = db.query(Label).filter(Label.label_id == label_id).first()
+    if not label:
+        raise HTTPException(status_code=404, detail="Label introuvable")
+
+    target_list = db.query(ListModel).filter(
+        ListModel.list_id == card.list_id
+    ).first()
+
+    is_member = db.query(BoardMember).filter(
+        BoardMember.board_id == target_list.board_id,
+        BoardMember.user_id == current_user
+    ).first()
+    if not is_member:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+
+    already_exists = any(l.label_id == label_id for l in card.labels)
+
+    if not already_exists:
+        raise HTTPException(
+            status_code=404,
+            detail="Label non assigné à la card"
+        )
+    card.labels.remove(label)
+    db.commit()
+
+    return {
+        "message": "Label retiré",
+        "card_id": card_id,
+        "label_id": label_id
+    }

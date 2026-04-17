@@ -120,10 +120,9 @@
   width: 100%;
   margin: 10px 0 0 0;
   padding: 5px;
-
+  cursor: pointer;
   color: white;
   background: var(--orange-button-color);
-
   border: none;
 }
 

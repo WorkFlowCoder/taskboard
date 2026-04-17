@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Comments from './Comments';
 import { addComment } from '../../services/boardService';
 import { useAuth } from '../auth/AuthContext';
@@ -11,18 +11,37 @@ interface CardProps {
   board: any;
   members: any[];
   onDeleteCard: (cardId: number) => void;
-  onUpdateCard: (cardId: number, title: string, description: string) => boolean;
-  onUpdateList: () => void;
+  onUpdateCard: (cardId: number, title: string, description: string) => Promise<boolean>;
+  onCreateTag: (title: string, color: string) => void;
+  onAssignTag: (tagId: number, cardId: number) => void;
+  onRemoveTag: (tagId: number, cardId: number) => void;
 }
 
-const Card: React.FC<CardProps> = ({ card, board, members, onDeleteCard, onUpdateCard, onUpdateList }) => {
+const Card: React.FC<CardProps> = ({ card, board, members, onDeleteCard, onUpdateCard, onCreateTag, onAssignTag, onRemoveTag }) => {
   const { authToken } = useAuth();
+  const tagBoxRef = useRef<HTMLDivElement>(null);
   const [showTagBox, setShowTagBox] = React.useState(false);
   const [onEditMode, setOnEditMode] = useState(false); // État pour gérer le mode édition
   const [editedCard, setEditedCard] = useState({ title: card.title, description: card.description }); // État pour les modifications
-  //intégration de la modification de la card (titre et description) à faire
-  const handleAddComment = async (content: string) => {
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        tagBoxRef.current &&
+        !tagBoxRef.current.contains(event.target as Node)
+      ) {
+        setShowTagBox(false);
+      }
+    };
+    if (showTagBox) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showTagBox]);
+
+  const handleAddComment = async (content: string) => {
     try {
       if (!authToken) {
         throw new Error('Utilisateur non authentifié');
@@ -36,7 +55,6 @@ const Card: React.FC<CardProps> = ({ card, board, members, onDeleteCard, onUpdat
 
   const handleDeleteCard = (cardId: number) => {
     onDeleteCard(cardId);
-    onUpdateList();
   };
 
   const cancelModifications = () => {
@@ -44,13 +62,17 @@ const Card: React.FC<CardProps> = ({ card, board, members, onDeleteCard, onUpdat
     setOnEditMode(false);
   }
 
-  const saveModifications = () => {
-    const success = onUpdateCard(card.card_id, editedCard.title, editedCard.description);
+  const saveModifications = async () => {
+    const success = await onUpdateCard(card.card_id, editedCard.title, editedCard.description);
     if (success) {
       card.title = editedCard.title;
       card.description = editedCard.description;
       cancelModifications();
     }
+  }
+
+  const handleAddTag = (tag_id: number) => {
+    onAssignTag(tag_id,card.card_id);
   }
 
   return (
@@ -103,33 +125,36 @@ const Card: React.FC<CardProps> = ({ card, board, members, onDeleteCard, onUpdat
           <div className="card-labels">
             {card.labels?.map((labelId: number) => {
               const label = board.tags?.find((tag: any) => tag.label_id === labelId);
-              return label ? (
-                <span
-                  key={label.label_id}
-                  className="card-label"
-                  style={{ backgroundColor: label.color }}
-                >
+              if (!label) return null;
+              return (
+                <span key={label.label_id} className="card-label" style={{ backgroundColor: label.color }}>
                   {label.title}
+                  <span
+                    className="remove-label"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemoveTag(label.label_id, card.card_id);
+                    }}
+                  >
+                    ×
+                  </span>
                 </span>
-              ) : null;
+              );
             })}
           </div>
-          <div className="add-tag-circle" onClick={() => setShowTagBox(true)}>+</div>
+          <div className="add-tag-circle" onClick={(e) => { e.stopPropagation(); setShowTagBox(true); }}>+</div>
         </div>
         {showTagBox && (
-        <TagBox
-          tags={board.tags}
-          onClose={() => setShowTagBox(false)}
-          onCreateTag={(title) => {
-            console.log("CREATE TAG:", title);
-            // TODO: call API create tag
-          }}
-          onAssignTag={(tagId) => {
-            console.log("ASSIGN TAG:", tagId, "TO CARD", card.card_id);
-            // TODO: call API assign tag
-          }}
-        />
-      )}
+          <div ref={tagBoxRef}> 
+            <TagBox
+              tags={board.tags}
+              cardLabels={card.labels}
+              onClose={() => setShowTagBox(false)}
+              onCreateTag={onCreateTag}
+              onAssignTag={handleAddTag}
+            />
+          </div>
+        )}
       </div>
       <div className="card-body">
         <div className="card-description-container">

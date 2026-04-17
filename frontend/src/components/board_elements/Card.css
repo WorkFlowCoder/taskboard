@@ -43,6 +43,12 @@
   display: flex;
   align-items: center;
   gap: 10px;
+
+  text-shadow: 
+    1px 0 0 black,
+   -1px 0 0 black,
+    0 1px 0 black,
+    0 -1px 0 black;
 }
 
 .card-labels {
@@ -151,4 +157,19 @@
   margin-bottom: 10px;
   border: white 1px solid;
   width: 100%;
+}
+
+.remove-label {
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+  margin-left: 2px;
+  padding: 2px;
+  font-size: 16px;
+}
+
+.remove-label:hover {
+  opacity: 1;
 }

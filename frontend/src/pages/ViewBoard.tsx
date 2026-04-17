@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/auth/AuthContext';
 import './ViewBoard.css';
-import { fetchBoardById } from '../services/boardService';
+import { fetchBoardById, createLabel } from '../services/boardService';
 import { createList, updateListPosition } from '../services/listService';
-import { createCard, deleteCard, moveCard, updateCard } from '../services/cardService';
+import { createCard, deleteCard, moveCard, updateCard, addLabelToCard, removeLabelFromCard } from '../services/cardService';
 import List from '../components/board_elements/List';
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, rectSortingStrategy  } from '@dnd-kit/sortable';
@@ -72,6 +72,58 @@ const ViewBoard: React.FC = () => {
       alert(err.message);
     }
   };
+
+  const handleCreateTag = async (title: string, color: string) => {
+    try {
+      const newLabel = await createLabel(board.board_id, title, color, authToken );
+      setBoard((prevBoard: any) => ({
+        ...prevBoard,
+        tags: [...(prevBoard?.tags ?? []), newLabel]
+      }));
+    } catch (error) {
+      console.error("Erreur lors de la création du tag :", error);
+    }
+  };
+
+const handleAssignTag = async (tagId: number, cardId: number) => {
+  try {
+    await addLabelToCard(cardId, tagId, authToken);
+    setBoard((prevBoard: any) => ({
+      ...prevBoard,
+      lists: prevBoard.lists.map((list: any) => ({
+        ...list,
+        cards: list.cards.map((card: any) =>
+          card.card_id === cardId ? {
+            ...card,
+            labels: [...(card.labels ? card.labels : []),tagId]
+          } : card)
+        }))
+      }));
+    } catch (error) {
+      console.error("Erreur lors de l'assignation du tag à la carte :", error);
+    }
+  };
+
+  const handleRemoveTag = async (tagId: number, cardId: number) => {
+    try {
+      await removeLabelFromCard(cardId, tagId, authToken);
+      setBoard((prevBoard: any) => ({
+        ...prevBoard,
+        lists: prevBoard.lists.map((list: any) => ({
+          ...list,
+          cards: list.cards.map((card: any) =>
+            card.card_id === cardId ? {
+              ...card,
+              labels: (card.labels ?? []).filter((id: number) => id !== tagId)
+            }: card)
+          })
+        )
+      }));
+    } catch (error) {
+      console.error("Erreur lors de la suppression du tag de la carte :", error);
+    }
+  };
+
 
   const handleCreateCard = async ( listId: number, title: string, description: string ) => {
     try {
@@ -309,7 +361,14 @@ const ViewBoard: React.FC = () => {
             strategy={rectSortingStrategy}
           >
             {board.lists?.map((list: any) => (
-              <List key={list.list_id} list={list} board={board} handleCreateCard={handleCreateCard} onDeleteCard={onDeleteCard} onUpdateCard={onUpdateCard}/>
+              <List key={list.list_id} list={list} board={board}
+                handleCreateCard={handleCreateCard}
+                onDeleteCard={onDeleteCard}
+                onUpdateCard={onUpdateCard}
+                onCreateTag={handleCreateTag}
+                onAssignTag={handleAssignTag}
+                onRemoveTag={handleRemoveTag}
+              />
             ))}
           </SortableContext>
           <div className="add-list-button" onClick={() => setShowPopup(true)}>

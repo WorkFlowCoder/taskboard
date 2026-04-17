@@ -3,9 +3,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text, func
 from typing import List
 from ..database import get_db
-from ..models import Board, BoardMember, Card, List, Comment
+from ..models import Board, BoardMember, Card, List, Comment, Label
 from ..utils.auth import get_current_user
 from ..schemas.board import BoardCreate, CommentCreate
+from ..schemas.label import LabelCreate, LabelResponse
 
 router = APIRouter(tags=["Boards"])
 
@@ -191,3 +192,43 @@ def create_comment(comment_data: CommentCreate, db: Session = Depends(get_db), c
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail="Erreur lors de la création du commentaire")
+    
+@router.post("/boards/{board_id}/labels", response_model=LabelResponse, status_code=201)
+def create_label( board_id: int, payload: LabelCreate, current_user: int = Depends(get_current_user), db: Session = Depends(get_db) ):
+    board = db.query(Board).filter(Board.board_id == board_id).first()
+    if not board:
+        raise HTTPException(status_code=404, detail="Board introuvable")
+
+    is_member = db.query(BoardMember).filter(
+        BoardMember.board_id == board_id,
+        BoardMember.user_id == current_user
+    ).first()
+    if not is_member:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+
+    existing_label = db.query(Label).filter(
+        Label.board_id == board_id,
+        Label.title == payload.title
+    ).first()
+    if existing_label:
+        raise HTTPException( status_code=400, detail="Un label avec ce titre existe déjà" )
+
+    try:
+        new_label = Label(
+            title=payload.title,
+            color=payload.color,
+            board_id=board_id
+        )
+
+        db.add(new_label)
+        db.commit()
+        db.refresh(new_label)
+
+        return new_label
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erreur création label: {str(e)}"
+        )

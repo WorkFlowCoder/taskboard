@@ -14,10 +14,13 @@ interface ListProps {
   board: any;
   handleCreateCard: (listId: number, title: string, description: string) => void;
   onDeleteCard: (cardId: number) => void;
-  onUpdateCard: (cardId: number, title: string, description: string) => boolean;
+  onUpdateCard: (cardId: number, title: string, description: string) => Promise<boolean>;
+  onCreateTag: (title: string, color: string) => void;
+  onAssignTag: (tagId: number, cardId: number) => void;
+  onRemoveTag: (tagId: number, cardId: number) => void;
 }
 
-const List: React.FC<ListProps> = ({ list, board, handleCreateCard, onDeleteCard, onUpdateCard }) => {
+const List: React.FC<ListProps> = ({ list, board, handleCreateCard, onDeleteCard, onUpdateCard, onCreateTag, onAssignTag, onRemoveTag }) => {
 
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable(
     { id: list.list_id, data: { type: 'list'} }
@@ -27,7 +30,7 @@ const List: React.FC<ListProps> = ({ list, board, handleCreateCard, onDeleteCard
     transition,
   };
   const [isDeleted, setIsDeleted] = useState(false);
-  const [selectedCard, setSelectedCard] = useState<any>(null);
+  const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [createCardModalOpen, setCreateCardModalOpen] = useState(false);
 
   if (isDeleted) return null;
@@ -38,16 +41,11 @@ const List: React.FC<ListProps> = ({ list, board, handleCreateCard, onDeleteCard
       if (!authToken) {
         throw new Error('Utilisateur non authentifié');
       }
-
       await deleteList(listId, authToken);
       setIsDeleted(true);
     } catch (error) {
       console.error('Erreur lors de la suppression de la liste:', error);
     }
-  };
-
-  const onUpdateList = () => {
-    setSelectedCard(null);
   };
 
 
@@ -81,31 +79,37 @@ const List: React.FC<ListProps> = ({ list, board, handleCreateCard, onDeleteCard
         )}
       </div>
       <SortableContext
-        items={(list.cards ?? []).map((card: { card_id: string }) => card.card_id)}
+        items={(list.cards ?? []).map((card: { card_id: number }) => card.card_id)}
         strategy={verticalListSortingStrategy}
       >
         <div className="cards-container">
-          {list.cards?.map((card: { card_id: string; title: string }) => (
-            <SortableCard key={card.card_id} card={card} onClick={() => setSelectedCard(card)} />
+          {list.cards?.map((card: { card_id: number; title: string }) => (
+            <SortableCard key={card.card_id} card={card} onClick={() => setSelectedCardId(card.card_id)} />
           ))}
         </div>
       </SortableContext>
-      {selectedCard && (
-        <>
-          <div className="modal-overlay" onClick={() => setSelectedCard(null)}></div>
-          <div className="card-modal">
-            <Card
-              card={selectedCard}
-              board={board}
-              members={board.members}
-              onDeleteCard={onDeleteCard}
-              onUpdateList={onUpdateList}
-              onUpdateCard={onUpdateCard}
-            />
-            <button className="closebutton" onClick={() => setSelectedCard(null)}>Fermer</button>
-          </div>
-        </>
-      )}
+      {selectedCardId !== null && (() => {
+        const selectedCard = list.cards?.find((c: any) => c.card_id === selectedCardId);
+        if (!selectedCard) return null;
+        return (
+          <>
+            <div className="modal-overlay" onClick={() => setSelectedCardId(null)}></div>
+            <div className="card-modal">
+              <Card
+                card={selectedCard}
+                board={board}
+                members={board.members}
+                onDeleteCard={onDeleteCard}
+                onUpdateCard={onUpdateCard}
+                onCreateTag={onCreateTag}
+                onAssignTag={onAssignTag}
+                onRemoveTag={onRemoveTag}
+              />
+              <button className="closebutton" onClick={() => setSelectedCardId(null)}>Fermer</button>
+            </div>
+          </>
+        );
+      })()}
     </div>
   );
 };

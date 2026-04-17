@@ -187,3 +187,35 @@ export const addComment = async (cardId: number, content: string, authToken: str
     throw error;
   }
 };
+
+/**
+ * Ajouter un nouveau label sur un board
+ */
+export const createLabel = async ( boardId: number, title: string, color: string, authToken: string | null ) => {
+  if (!authToken) throw new Error('Token non fourni.');
+  try {
+    const response = await fetch(`${API_BASE_URL}/boards/${boardId}/labels`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title,
+        color,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.detail || 'Erreur lors de la création du label'
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Erreur service createLabel:', error);
+    throw error;
+  }
+};

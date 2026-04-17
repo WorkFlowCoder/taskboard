@@ -9,25 +9,19 @@ interface Tag {
 
 interface TagBoxProps {
   tags: Tag[];
+  cardLabels: number[];
   onCreateTag: (title: string, color: string) => void;
   onAssignTag: (tagId: number) => void;
   onClose: () => void;
 }
 
-const TagBox: React.FC<TagBoxProps> = ({
-  tags,
-  onCreateTag,
-  onAssignTag,
-  onClose,
-}) => {
+const TagBox: React.FC<TagBoxProps> = ({tags, cardLabels, onCreateTag, onAssignTag, onClose}) => {
   const [newTagTitle, setNewTagTitle] = useState('');
-  const [color, setColor] = useState('#3498db');
+  const [color, setColor] = useState('#7a7a7a');
   const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
 
   return (
     <div className="tag-box">
-      
-      {/* HEADER (fermeture) */}
       <div className="tag-box-header">
         <span>Tags</span>
         <button className="tag-box-header-button" onClick={onClose}>×</button>
@@ -63,7 +57,7 @@ const TagBox: React.FC<TagBoxProps> = ({
 
       {/* LISTE TAGS */}
       <div className="tag-list">
-        {tags?.map((tag) => (
+        {tags ?.filter((tag) => !cardLabels?.includes(tag.label_id)).map((tag) => (
           <div
             key={tag.label_id}
             className={`tag-item ${selectedTagId === tag.label_id ? 'selected' : ''}`}

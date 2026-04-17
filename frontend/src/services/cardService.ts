@@ -122,3 +122,59 @@ export const updateCard = async ( cardId: number, title: string, description: st
     throw error;
   }
 };
+
+/**
+ * Ajoute un label à une carte
+ */
+export const addLabelToCard = async ( cardId: number, labelId: number, authToken: string | null ) => {
+  if (!authToken) throw new Error('Token non fourni.');
+  try {
+    const response = await fetch(
+      `${API_URL}/cards/${cardId}/labels/${labelId}`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.detail || "Erreur lors de l’ajout du label"
+      );
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Erreur addLabelToCard:', error);
+    throw error;
+  }
+};
+
+/**
+ * Retire un label d'une carte
+ */
+export const removeLabelFromCard = async ( cardId: number, labelId: number, authToken: string | null) => {
+  if (!authToken) throw new Error('Token non fourni.');
+  try {
+    const response = await fetch(
+      `${API_URL}/cards/${cardId}/labels/${labelId}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.detail || 'Erreur lors de la suppression du label'
+      );
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Erreur removeLabelFromCard:', error);
+    throw error;
+  }
+};
