@@ -1,0 +1,91 @@
+/* =========================
+   CARD BOX
+========================= */
+
+.card-box {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 260px;
+  padding: 12px;
+  background: white;
+  border: 1px solid var(--primary-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.card-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.card-box-header-button {
+  font-size: 18px;
+  color: var(--primary-color);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* =========================
+   FORM
+========================= */
+
+.card-create {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-create input,
+.card-create textarea {
+  width: 100%;
+  padding: 6px 8px;
+
+  border: 1px solid var(--primary-color);
+  border-radius: 4px;
+
+  font-size: 13px;
+  resize: none;
+
+  box-sizing: border-box;
+}
+
+/* =========================
+   BUTTON
+========================= */
+
+.card-create-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  width: 100%;
+  margin-top: 12px;
+  padding: 6px;
+
+  color: white;
+  background: var(--primary-color);
+
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.card-create-button svg.lucide {
+  color:white;
+}
+
+.card-create-button:hover {
+  opacity: 0.9;
+}

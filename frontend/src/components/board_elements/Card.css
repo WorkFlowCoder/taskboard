@@ -4,6 +4,7 @@
 
 .card-header {
   margin-bottom: 10px;
+  position: relative;
 }
 
 .card-name {
@@ -96,4 +97,58 @@
 
   border-radius: 50%;
   cursor: pointer;
+}
+
+.card-edit-btn, .card-delete-btn, .card-cancel-btn, .card-save-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-edit-or-delete-btns, .card-cancel-or-save-btns {
+  position: absolute;
+  display: flex;
+  margin-top: -10px;
+  top: 6px;
+  right: 6px;
+}
+
+.card-delete-btn svg.lucide {
+  color: var(--primary-color);
+}
+
+.card-edit-btn svg.lucide, .card-cancel-btn svg.lucide {
+  color: var(--orange-button-color);
+}
+
+.card-save-btn svg.lucide {
+  color: var(--green-button-color);
+}
+
+.editable-card-title,
+.editable-card-description {
+  display: flex;
+  align-items: center;
+
+  color: var(--orange-button-color);
+
+  outline: none;
+  border: none;
+  background-color: transparent;
+}
+
+.editable-card-title {
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+}
+
+.editable-card-description {
+  font-size: 1rem;
+  margin-bottom: 10px;
+  border: white 1px solid;
+  width: 100%;
 }

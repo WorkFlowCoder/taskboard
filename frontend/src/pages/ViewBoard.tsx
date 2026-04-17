@@ -4,7 +4,7 @@ import { useAuth } from '../components/auth/AuthContext';
 import './ViewBoard.css';
 import { fetchBoardById } from '../services/boardService';
 import { createList, updateListPosition } from '../services/listService';
-import { moveCard } from '../services/cardService';
+import { createCard, deleteCard, moveCard, updateCard } from '../services/cardService';
 import List from '../components/board_elements/List';
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, rectSortingStrategy  } from '@dnd-kit/sortable';
@@ -72,6 +72,67 @@ const ViewBoard: React.FC = () => {
       alert(err.message);
     }
   };
+
+  const handleCreateCard = async ( listId: number, title: string, description: string ) => {
+    try {
+      const newCard = await createCard( listId, title, description, authToken );
+      setBoard((prevBoard: any) => ({
+        ...prevBoard,
+        lists: prevBoard.lists.map((list: any) =>
+          list.list_id === listId
+            ? { ...list, cards: [...list.cards, newCard] } : list
+        ),
+      }));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const onDeleteCard = async (cardId: number) => {
+    try {
+      const response = await deleteCard(cardId, authToken);
+
+      const { list_id } = response;
+
+      setBoard((prevBoard: any) => ({
+        ...prevBoard,
+        lists: prevBoard.lists.map((list: any) =>
+          list.list_id === list_id
+            ? {
+                ...list,
+                cards: list.cards.filter(
+                  (card: any) => card.card_id !== cardId
+                ),
+              }
+            : list
+        ),
+      }));
+    } catch (error) {
+      console.error("Erreur delete card:", error);
+    }
+  };
+
+  const onUpdateCard = async (cardId: number, title: string, description: string) => {
+    try {
+      await updateCard(cardId, title, description, authToken);
+
+      setBoard((prevBoard: any) => ({
+        ...prevBoard,
+        lists: prevBoard.lists.map((list: any) => ({
+          ...list,
+          cards: list.cards.map((card: any) =>
+            card.card_id === cardId
+              ? { ...card, title, description }
+              : card
+          ),
+        })),
+      }));
+      return true;
+    } catch (error) {
+      console.error("Erreur update card:", error);
+    }
+    return false;
+  }
 
   const findListByCardId = (cardId: number) => {
     return board.lists.find((list: any) =>
@@ -248,7 +309,7 @@ const ViewBoard: React.FC = () => {
             strategy={rectSortingStrategy}
           >
             {board.lists?.map((list: any) => (
-              <List key={list.list_id} list={list} board={board}/>
+              <List key={list.list_id} list={list} board={board} handleCreateCard={handleCreateCard} onDeleteCard={onDeleteCard} onUpdateCard={onUpdateCard}/>
             ))}
           </SortableContext>
           <div className="add-list-button" onClick={() => setShowPopup(true)}>

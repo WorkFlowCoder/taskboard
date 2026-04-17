@@ -24,13 +24,16 @@
 ========================= */
 
 .list-header {
-  display: flex;
   align-items: center;
   padding: 8px 10px;
+  gap: 10px;
+  position: relative;
+  display: inline-block;
 }
 
 .list-title-wrapper {
   display: flex;
+  float: left;
   align-items: center;
   flex: 1;
 }
@@ -83,9 +86,12 @@
   transition: background-color 0.3s;
 }
 
-.delete-icon {
+.delete-icon,  .create-card-icon{
   margin-left: auto;
   cursor: pointer;
+  float: right;
+  margin: 4px;
+  margin-top: 10px;
 }
 
 /* =========================

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Comments from './Comments';
 import { addComment } from '../../services/boardService';
-import { useAuth } from '../auth/AuthContext'; // Import du contexte d'authentification
+import { useAuth } from '../auth/AuthContext';
+import { Edit3, Trash2, XCircle, CheckCircle } from "lucide-react";
 import TagBox from './TagBox';
 import './Card.css';
 
@@ -9,12 +10,17 @@ interface CardProps {
   card: any;
   board: any;
   members: any[];
+  onDeleteCard: (cardId: number) => void;
+  onUpdateCard: (cardId: number, title: string, description: string) => boolean;
+  onUpdateList: () => void;
 }
 
-const Card: React.FC<CardProps> = ({ card, board, members }) => {
-  const { authToken } = useAuth(); // Récupération du token d'authentification
+const Card: React.FC<CardProps> = ({ card, board, members, onDeleteCard, onUpdateCard, onUpdateList }) => {
+  const { authToken } = useAuth();
   const [showTagBox, setShowTagBox] = React.useState(false);
-
+  const [onEditMode, setOnEditMode] = useState(false); // État pour gérer le mode édition
+  const [editedCard, setEditedCard] = useState({ title: card.title, description: card.description }); // État pour les modifications
+  //intégration de la modification de la card (titre et description) à faire
   const handleAddComment = async (content: string) => {
 
     try {
@@ -26,12 +32,73 @@ const Card: React.FC<CardProps> = ({ card, board, members }) => {
     } catch (error: any) {
       return {"send": false, "message": error.message};
     }
-};
+  };
+
+  const handleDeleteCard = (cardId: number) => {
+    onDeleteCard(cardId);
+    onUpdateList();
+  };
+
+  const cancelModifications = () => {
+    setEditedCard({ title: card.title, description: card.description });
+    setOnEditMode(false);
+  }
+
+  const saveModifications = () => {
+    const success = onUpdateCard(card.card_id, editedCard.title, editedCard.description);
+    if (success) {
+      card.title = editedCard.title;
+      card.description = editedCard.description;
+      cancelModifications();
+    }
+  }
 
   return (
     <div className="card">
       <div className="card-header">
-        <h2 className="card-name">{card.title}</h2>
+        
+        {onEditMode ? (
+          <>
+            <input
+              type="text"
+              value={editedCard.title}
+              onChange={(e) => setEditedCard((prev) => ({ ...prev, title: e.target.value }))}
+              className="editable-card-title"
+            />
+            <div className="card-cancel-or-save-btns">
+              <button
+                className="card-cancel-btn" 
+                onClick={cancelModifications}
+              >
+                <XCircle size={24} />
+              </button>
+              <button
+                className="card-save-btn" 
+                onClick={saveModifications}
+              >
+                <CheckCircle size={24} />
+              </button>
+            </div>
+          </>
+        ):(
+          <>
+            <h2 className="card-name">{card.title}</h2>
+            <div className="card-edit-or-delete-btns">
+              <button
+                className="card-edit-btn" 
+                onClick={() => setOnEditMode(true)}
+              >
+                <Edit3 size={24} />
+              </button>
+              <button
+                className="card-delete-btn" 
+                onClick={() => handleDeleteCard(card.card_id)}
+              >
+                <Trash2 size={24} />
+              </button>
+            </div>
+          </>
+        )}
         <div className="card-labels-container">
           <div className="card-labels">
             {card.labels?.map((labelId: number) => {
@@ -67,7 +134,15 @@ const Card: React.FC<CardProps> = ({ card, board, members }) => {
       <div className="card-body">
         <div className="card-description-container">
           <h3>Description :</h3>
-          <p className="card-description">{card.description || 'Pas de description'}</p>
+          {onEditMode ? (
+            <textarea
+              value={editedCard.description}
+              onChange={(e) => setEditedCard((prev) => ({ ...prev, description: e.target.value }))}
+              className="editable-card-description"
+            />
+          ):(
+            <p className="card-description">{card.description || 'Pas de description'}</p>
+          )}
         </div>
         <div className="card-members">
           {card.members?.map((memberId: number) => {
