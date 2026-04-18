@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import text, func
+from sqlalchemy import text, func, union_all, select
 from typing import List
 from ..database import get_db
 from ..models import Board, BoardMember, Card, List, Comment, Label
@@ -70,35 +70,108 @@ def get_user_boards(current_user: int = Depends(get_current_user), db: Session =
     # Utilisation de l'ORM pour plus de clarté
     boards = db.query(Board).join(BoardMember).filter(BoardMember.user_id == current_user).all()
     if not boards:
-        return [] # Retourner une liste vide au lieu d'une 404 est souvent préférable pour le front-end
+        return []
     return {"user_id": current_user, "boards": boards}
 
 @router.get("/boards/stats")
-def get_boards_stats(current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
-    # Récupération des boards via l'appartenance
-    user_boards = db.query(Board).join(BoardMember).filter(BoardMember.user_id == current_user).all()
-    
+def get_boards_stats( current_user: int = Depends(get_current_user), db: Session = Depends(get_db)):
+    user_boards = (
+        db.query(Board).join(BoardMember).filter(BoardMember.user_id == current_user).all()
+    )
     if not user_boards:
         raise HTTPException(status_code=404, detail="Aucun board trouvé")
 
     stats = []
     for board in user_boards:
-        # Calcul du total des cartes via ORM (plus lisible)
-        total_cards = db.query(Card).join(List).filter(List.board_id == board.board_id).count()
+        # KPI BASE
+        total_cards = (
+            db.query(func.count(Card.card_id)).join(List, Card.list_id == List.list_id)
+            .filter(List.board_id == board.board_id).scalar()
+        ) or 0
 
-        # Cartes par liste
-        cards_per_list = db.query(
-            List.list_id, 
-            List.title.label("list_title"), 
-            func.count(Card.card_id).label("card_count")
-        ).outerjoin(Card).filter(List.board_id == board.board_id).group_by(List.list_id).order_by(List.position).all()
+        total_comments = (
+            db.query(func.count(Comment.comment_id)).join(Card, Comment.card_id == Card.card_id)
+            .join(List, Card.list_id == List.list_id).filter(List.board_id == board.board_id).scalar()
+        ) or 0
+
+        avg_comments = (
+            total_comments / total_cards if total_cards else 0
+        )
+
+        last_card_activity = (
+            db.query(func.max(Card.created_at)).join(List, Card.list_id == List.list_id)
+            .filter(List.board_id == board.board_id).scalar()
+        )
+
+        last_comment_activity = (
+            db.query(func.max(Comment.created_at)).join(Card, Comment.card_id == Card.card_id)
+            .join(List, Card.list_id == List.list_id).filter(List.board_id == board.board_id).scalar()
+        )
+
+        last_activity = max(
+            (d for d in [last_card_activity, last_comment_activity] if d),
+            default=None
+        )
+
+        cards_events = (
+            db.query(
+                func.date(Card.created_at).label("date"), func.count(Card.card_id).label("value")
+            )
+            .join(List, Card.list_id == List.list_id).filter(List.board_id == board.board_id)
+            .group_by(func.date(Card.created_at))
+        )
+
+        comments_events = (
+            db.query(
+                func.date(Comment.created_at).label("date"), func.count(Comment.comment_id).label("value")
+            )
+            .join(Card, Comment.card_id == Card.card_id).join(List, Card.list_id == List.list_id)
+            .filter(List.board_id == board.board_id).group_by(func.date(Comment.created_at))
+        )
+        union = cards_events.union_all(comments_events).subquery()
+        activity_over_time = (
+            db.query(
+                union.c.date, func.sum(union.c.value).label("count")
+            )
+            .group_by(union.c.date).order_by(union.c.date).all()
+        )
+        cards_per_list = (
+            db.query(
+                List.list_id,
+                List.title.label("list_title"),
+                func.count(Card.card_id).label("card_count")
+            )
+            .outerjoin(Card, Card.list_id == List.list_id).filter(List.board_id == board.board_id)
+            .group_by(List.list_id).order_by(List.position).all()
+        )
+
+        total_cards_in_board = total_cards
 
         stats.append({
             "board_id": board.board_id,
             "board_title": board.title,
+            # KPI
             "total_cards": total_cards,
-            "cards_per_list": [row._asdict() for row in cards_per_list]
+            "total_comments": total_comments,
+            "avg_comments_per_card": round(avg_comments, 2),
+            "last_activity": last_activity,
+            "cards_over_time": [
+                {"date": str(row.date), "count": row.count}
+                for row in activity_over_time
+            ],
+            "cards_per_list": [
+                {
+                    "list_id": row.list_id,
+                    "list_title": row.list_title,
+                    "card_count": row.card_count,
+                    "percentage": round(
+                        (row.card_count / total_cards_in_board) * 100, 2
+                    ) if total_cards_in_board else 0
+                }
+                for row in cards_per_list
+            ]
         })
+
     return stats
 
 @router.get("/boards/{board_id}/details")

@@ -14,81 +14,13 @@
 }
 
 /* =========================
-   LAYOUT
+   LAYOUT CONTAINER (optionnel si utilisé plus tard)
 ========================= */
 
 .projects-container {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 20px;
-}
-
-.projects-list {
-  display: block;
-  margin-top: 20px;
-}
-
-/* =========================
-   BOARD SECTION
-========================= */
-
-.board-section {
-  margin-bottom: 30px;
-  padding: 10px;
-
-  background-color: white;
-  color: var(--primary-color);
-
-  border: 1px solid var(--primary-color);
-  border-radius: 8px;
-
-  box-shadow: 0 4px 6px var(--primary-color);
-
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.board-section:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 10px var(--black-color);
-}
-
-/* =========================
-   PROGRESS BAR
-========================= */
-
-.progress-bar {
-  width: 100%;
-  height: 10px;
-
-  margin: 5px 0;
-  overflow: hidden;
-
-  background-color: var(--gray-color);
-  border-radius: 4px;
-}
-
-.progress {
-  height: 100%;
-  background-color: var(--primary-color);
-
-  transition: width 0.3s ease;
-}
-
-/* =========================
-   LIST ITEMS
-========================= */
-
-.list-item {
-  margin-bottom: 15px;
-}
-
-.lists-details {
-  list-style: none;
-  padding: 0;
-}
-
-.lists-details li {
-  margin-bottom: 5px;
 }
 
 /* =========================
